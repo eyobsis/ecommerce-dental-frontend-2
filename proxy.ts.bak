@@ -1,0 +1,63 @@
+// middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+const rolePermissions: Record<string, string[]> = {
+  ADMIN: ["*"], // full access
+  OWNER: ["*"], // full access
+  DESIGNER: ['/designer', '/admin/profile'],
+  MANAGER: [
+    "/admin/orders",
+    "/admin/designer",
+    "/admin/client-credentials",
+    "/admin/products",
+    "/admin/profile",
+  ],
+  RECEPTION: ["/admin/orders", "/admin/client-credentials", "/admin/profile"],
+  SCANNER: ["/admin/orders", "/admin/designer", "/admin/profile"],
+  ACCOUNTANT: ["/admin/client-credentials", "/admin/profile"],
+  STAINER: ["/admin/orders", "/admin/profile"],
+  MILLER: ["/admin/orders", "/admin/profile"],
+};
+
+export async function proxy(req: NextRequest) {
+  // 1. Get session
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session?.user) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // 2. Fetch role from DB
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // 3. Get current pathname directly from NextRequest
+  const pathname = req.nextUrl.pathname.toLowerCase().replace(/\/$/, "");
+
+  // 4. Check role permissions
+  const allowedPaths = rolePermissions[user.role] || [];
+  const isAllowed =
+    allowedPaths.includes("*") ||
+    allowedPaths.some((path) => pathname.startsWith(path.toLowerCase()));
+
+  if (!isAllowed) {
+    return NextResponse.redirect(new URL(allowedPaths[0], req.url));
+  }
+
+  // 5. Allow request to continue
+  return NextResponse.next();
+}
+
+// Configure which routes the middleware runs on
+export const config = {
+  matcher: ["/admin/:path*", "/designer/:path*", "/"], // only run middleware on /admin & /designer routes
+};
+

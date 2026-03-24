@@ -1,0 +1,86 @@
+// middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+const rolePermissions: Record<string, string[]> = {
+  ADMIN: ["*"],
+  OWNER: ["*"],
+  DESIGNER: ["/designer", "/admin/profile"],
+  MANAGER: [
+    "/admin/orders",
+    "/admin/designer",
+    "/admin/client-credentials",
+    "/admin/products",
+    "/admin/profile",
+  ],
+  RECEPTION: ["/admin/orders", "/admin/client-credentials", "/admin/profile"],
+  SCANNER: ["/admin/orders", "/admin/designer", "/admin/profile"],
+  ACCOUNTANT: ["/admin/client-credentials", "/admin/profile"],
+  STAINER: ["/admin/orders", "/admin/profile"],
+  MILLER: ["/admin/orders", "/admin/profile"],
+};
+
+export async function proxy(req: NextRequest) {
+  const pathname = req.nextUrl.pathname;
+
+  // Allow public assets and Next.js internals
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  // Get session
+  const session = await auth.api.getSession({ headers: req.headers });
+
+  // If no session AND we're on an admin or designer path → redirect to main site login
+  if (!session?.user && (pathname.startsWith("/admin") || pathname.startsWith("/designer"))) {
+    const loginUrl = new URL("/auth/login", "https://royaldentallabet.com"); // Change to your actual login page
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // If no session and on root "/" → let it through (or redirect to login if you prefer)
+  if (!session?.user && pathname === "/") {
+    // Option A: Redirect to main site login (recommended for admin subdomain)
+    const loginUrl = new URL("/login", "https://royaldentallabet.com");
+    return NextResponse.redirect(loginUrl);
+
+    // Option B: Allow unauthenticated root (e.g., show a login page hosted on admin subdomain)
+    // return NextResponse.next();
+  }
+
+  // From here: user is authenticated
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/login", "https://royaldentallabet.com"));
+  }
+
+  const allowedPaths = rolePermissions[user.role] || [];
+  const normalizedPath = pathname.toLowerCase().replace(/\/$/, "");
+
+  const isAllowed =
+    allowedPaths.includes("*") ||
+    allowedPaths.some((path) => normalizedPath.startsWith(path.toLowerCase()));
+
+  if (!isAllowed && (pathname.startsWith("/admin") || pathname.startsWith("/designer"))) {
+    // Redirect to their first allowed path (or a default dashboard)
+    const redirectPath = allowedPaths[0] === "*" ? "/admin" : allowedPaths[0];
+    return NextResponse.redirect(new URL(redirectPath, req.url));
+  }
+
+  return NextResponse.next();
+}
+
+// Only run on relevant paths — REMOVE "/" from matcher to avoid root loop
+export const config = {
+  matcher: ["/admin/:path*", "/designer/:path*"],
+};
+
