@@ -73,9 +73,7 @@ export default function MyOrdersPage() {
     const loadOrders = async () => {
       try {
         setError(null);
-        const response = await ecommerceApi.getUserOrders(
-          normalizeOrderUserId(session?.user?.id),
-        );
+        const response = await ecommerceApi.getUserOrders(session!.user!.id);
         const mapped = response.data.map((order: Order) => ({
           id: order.id,
           date: order.createdAt,

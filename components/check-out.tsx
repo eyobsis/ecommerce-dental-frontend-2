@@ -124,11 +124,13 @@ export default function CheckoutModal({
         "http://localhost:3001";
 
       const formData = new FormData();
+      console.log(session?.user?.id);
       const normalizedUserId = normalizeOrderUserId(session?.user?.id);
 
       if (normalizedUserId !== DEFAULT_ORDER_USER_ID) {
         formData.append("userId", normalizedUserId);
       }
+      formData.append("userId", session?.user?.id ?? "");
 
       formData.append("totalAmount", String(total));
       formData.append("items", JSON.stringify(items));
@@ -137,10 +139,13 @@ export default function CheckoutModal({
       formData.append("deliveryAddress", address);
       formData.append("paymentProof", screenshot as File);
 
-      const response = await fetch(`${backendUrl}/api/v1/orders/quick-checkout`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${backendUrl}/api/v1/orders/quick-checkout`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => null);
@@ -227,8 +232,12 @@ export default function CheckoutModal({
               ) : (
                 <>
                   <Upload className="mx-auto h-6 w-6 text-slate-500" />
-                  <p className="mt-1 text-xs font-medium text-slate-600">Upload payment proof</p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">PNG, JPG, or JPEG</p>
+                  <p className="mt-1 text-xs font-medium text-slate-600">
+                    Upload payment proof
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-slate-400">
+                    PNG, JPG, or JPEG
+                  </p>
                 </>
               )}
             </div>
@@ -236,7 +245,9 @@ export default function CheckoutModal({
 
           {/* RIGHT SIDE (SUMMARY) */}
           <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-sm">
-            <p className="text-lg font-semibold text-slate-900">Order Summary</p>
+            <p className="text-lg font-semibold text-slate-900">
+              Order Summary
+            </p>
 
             <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
               {items.map((p) => (
@@ -246,9 +257,7 @@ export default function CheckoutModal({
                 >
                   <div>
                     <p className="font-medium text-slate-800">{p.name}</p>
-                    <p className="text-xs text-slate-500">
-                      Qty: {p.quantity}
-                    </p>
+                    <p className="text-xs text-slate-500">Qty: {p.quantity}</p>
                   </div>
                   <span className="font-semibold text-slate-900">
                     {(p.price * p.quantity).toLocaleString()} ETB
