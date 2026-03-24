@@ -76,177 +76,188 @@ export default function CreateAccount({
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
-      {/* Left Section */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
-        <div className="max-w-xl text-slate-100 transition-transform duration-500 hover:-translate-y-0.5">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-slate-200 backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-            Royal Premium Access
-          </span>
-
-          <Image
-            src={Logo}
-            alt="Company Logo"
-            width={130}
-            height={130}
-            priority
-            className="mt-8 mb-8"
-          />
-          <h1 className="text-5xl font-semibold leading-tight tracking-tight">
-            Create Your
-            <span className="block bg-gradient-to-r from-indigo-200 via-white to-sky-200 bg-clip-text text-transparent">
-              Royal Commerce Account
+        {/* Left Section */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
+          <div className="max-w-xl text-slate-100 transition-transform duration-500 hover:-translate-y-0.5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-slate-200 backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              Royal Access
             </span>
-          </h1>
-          <p className="mt-5 text-lg text-slate-300 leading-relaxed">
-            Join to manage orders, save product preferences, and unlock a seamless premium dental shopping experience.
-          </p>
 
-          <div className="mt-8 inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 backdrop-blur">
-            <ShieldCheck className="h-5 w-5 text-emerald-300" />
-            <p className="text-sm text-slate-200">
-              Secure onboarding with protected account data.
+            <Image
+              src={Logo}
+              alt="Company Logo"
+              width={130}
+              height={130}
+              priority
+              className="mt-8 mb-8"
+            />
+            <h1 className="text-5xl font-semibold leading-tight tracking-tight">
+              Create Your
+              <span className="block bg-gradient-to-r from-indigo-200 via-white to-sky-200 bg-clip-text text-transparent">
+                Royal Commerce Account
+              </span>
+            </h1>
+            <p className="mt-5 text-lg text-slate-300 leading-relaxed">
+              Join to manage orders, save product preferences, and unlock a
+              seamless dental shopping experience.
+            </p>
+
+            <div className="mt-8 inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 backdrop-blur">
+              <ShieldCheck className="h-5 w-5 text-emerald-300" />
+              <p className="text-sm text-slate-200">
+                Secure onboarding with protected account data.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Section */}
+        <div className="flex flex-1 items-center justify-center p-4 sm:p-8 lg:p-10">
+          <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white/95 p-6 text-slate-900 shadow-[0_25px_80px_rgba(15,23,42,0.4)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_30px_90px_rgba(15,23,42,0.45)] sm:p-8 lg:p-10">
+            <div className="mb-5 flex items-center justify-center gap-2 lg:hidden">
+              <Image src={Logo} alt="Company Logo" width={26} height={26} />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Royal Access
+              </span>
+            </div>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                Create Account
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Get started in seconds
+              </p>
+            </div>
+
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
+                {/* Name */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="John Doe"
+                          disabled={loading}
+                          className="h-11 rounded-xl border-slate-300 focus-visible:ring-slate-900/20"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Email */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="you@example.com"
+                          type="email"
+                          disabled={loading}
+                          className="h-11 rounded-xl border-slate-300 focus-visible:ring-slate-900/20"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Password */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            placeholder="••••••••"
+                            type={showPassword ? "text" : "password"}
+                            disabled={loading}
+                            className="h-11 rounded-xl border-slate-300 pr-10 focus-visible:ring-slate-900/20"
+                            {...field}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                          >
+                            {showPassword ? (
+                              <EyeOff size={18} />
+                            ) : (
+                              <Eye size={18} />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  className="h-11 w-full rounded-xl bg-slate-900 text-base text-white hover:bg-slate-800"
+                  disabled={loading}
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create Account
+                </Button>
+              </form>
+            </Form>
+
+            {/* Divider */}
+            <div className="my-6 flex items-center">
+              <div className="flex-grow border-t" />
+              <span className="mx-3 text-xs text-gray-400 uppercase">
+                Or continue with
+              </span>
+              <div className="flex-grow border-t" />
+            </div>
+
+            {/* Social Buttons */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {socialProviders.map(({ name, icon: Icon, key }) => (
+                <Button
+                  key={name}
+                  variant="outline"
+                  className="h-11 rounded-xl border-slate-300 text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-900"
+                  onClick={() => onSocialSignUp?.(key)}
+                >
+                  <Icon className="mr-2 h-4 w-4" />
+                  {name}
+                </Button>
+              ))}
+            </div>
+
+            {/* Login Link */}
+            <p className="mt-8 text-center text-sm text-slate-500">
+              Already have an account?{" "}
+              <Link
+                href="/auth"
+                className="font-medium text-indigo-700 hover:underline"
+              >
+                Sign in
+              </Link>
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Right Section */}
-      <div className="flex flex-1 items-center justify-center p-4 sm:p-8 lg:p-10">
-        <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white/95 p-6 text-slate-900 shadow-[0_25px_80px_rgba(15,23,42,0.4)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_30px_90px_rgba(15,23,42,0.45)] sm:p-8 lg:p-10">
-          <div className="mb-5 flex items-center justify-center gap-2 lg:hidden">
-            <Image src={Logo} alt="Company Logo" width={26} height={26} />
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Royal Premium Access
-            </span>
-          </div>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Create Account</h2>
-            <p className="mt-2 text-sm text-slate-500">Get started in seconds</p>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              {/* Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="John Doe"
-                        disabled={loading}
-                        className="h-11 rounded-xl border-slate-300 focus-visible:ring-slate-900/20"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="you@example.com"
-                        type="email"
-                        disabled={loading}
-                        className="h-11 rounded-xl border-slate-300 focus-visible:ring-slate-900/20"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Password */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="••••••••"
-                          type={showPassword ? "text" : "password"}
-                          disabled={loading}
-                          className="h-11 rounded-xl border-slate-300 pr-10 focus-visible:ring-slate-900/20"
-                          {...field}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                        >
-                          {showPassword ? (
-                            <EyeOff size={18} />
-                          ) : (
-                            <Eye size={18} />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Submit */}
-              <Button
-                type="submit"
-                className="h-11 w-full rounded-xl bg-slate-900 text-base text-white hover:bg-slate-800"
-                disabled={loading}
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Account
-              </Button>
-            </form>
-          </Form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center">
-            <div className="flex-grow border-t" />
-            <span className="mx-3 text-xs text-gray-400 uppercase">
-              Or continue with
-            </span>
-            <div className="flex-grow border-t" />
-          </div>
-
-          {/* Social Buttons */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {socialProviders.map(({ name, icon: Icon, key }) => (
-              <Button
-                key={name}
-                variant="outline"
-                className="h-11 rounded-xl border-slate-300 text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-900"
-                onClick={() => onSocialSignUp?.(key)}
-              >
-                <Icon className="mr-2 h-4 w-4" />
-                {name}
-              </Button>
-            ))}
-          </div>
-
-          {/* Login Link */}
-          <p className="mt-8 text-center text-sm text-slate-500">
-            Already have an account?{" "}
-            <Link href="/auth" className="font-medium text-indigo-700 hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </div>
       </div>
     </div>
   );

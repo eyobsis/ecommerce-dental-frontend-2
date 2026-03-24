@@ -3,10 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  ChevronDown,
-} from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -14,7 +11,7 @@ export default function HeroSection() {
       <div className="pointer-events-none absolute inset-0">
         <Image
           src="/dental_chair.jpg"
-          alt="Premium dental chair setup"
+          alt="dental chair setup"
           fill
           className="hero-bg-image-a object-cover opacity-82"
           sizes="100vw"
@@ -33,11 +30,12 @@ export default function HeroSection() {
           </span>
 
           <h1 className="mx-auto mt-5 max-w-4xl text-3xl font-extrabold leading-tight text-slate-950 drop-shadow-[0_4px_14px_rgba(255,255,255,0.35)] md:text-5xl lg:text-6xl">
-            Premium Dental Products, Ready to Order
+            Dental Products, Ready to Order
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl text-base text-slate-900/95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.35)] md:text-lg">
-            A sleek catalog for clinics and labs to discover, compare, and purchase trusted dental essentials.
+            A sleek catalog for clinics and labs to discover, compare, and
+            purchase trusted dental essentials.
           </p>
 
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
@@ -48,9 +46,7 @@ export default function HeroSection() {
               </Button>
             </Link>
             <Link href="/auth">
-              <Button
-                className="h-11 rounded-xl bg-slate-950 px-6 text-white shadow-[0_12px_26px_-14px_rgba(15,23,42,0.9)] transition-all duration-300 hover:scale-[1.02] hover:bg-black"
-              >
+              <Button className="h-11 rounded-xl bg-slate-950 px-6 text-white shadow-[0_12px_26px_-14px_rgba(15,23,42,0.9)] transition-all duration-300 hover:scale-[1.02] hover:bg-black">
                 Sign In
               </Button>
             </Link>

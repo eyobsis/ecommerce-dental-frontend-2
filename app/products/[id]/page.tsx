@@ -51,7 +51,7 @@ import type { IProduct } from "@/store/productStore";
 //       { id: "v1", name: "Standard Model", additionalPrice: 0, stock: 8 },
 //       {
 //         id: "v2",
-//         name: "Premium Model with Touch Controls",
+//         name: "Model with Touch Controls",
 //         additionalPrice: 10000,
 //         stock: 4,
 //       },
@@ -121,7 +121,10 @@ const ProductDetailPage = () => {
         ]);
 
         const categoryMap = new Map(
-          categoriesResponse.data.map((category) => [category.id, category.name]),
+          categoriesResponse.data.map((category) => [
+            category.id,
+            category.name,
+          ]),
         );
 
         const mappedProducts = await Promise.all(
@@ -141,8 +144,9 @@ const ProductDetailPage = () => {
               price: Number(product.price),
               description: product.description || "No description available",
               features:
-                product.features?.map((feature) => feature.feature).filter(Boolean) ||
-                [],
+                product.features
+                  ?.map((feature) => feature.feature)
+                  .filter(Boolean) || [],
               images: imageUrls,
               category: {
                 id: product.categoryId || "uncategorized",
@@ -218,7 +222,9 @@ const ProductDetailPage = () => {
   if (!product) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-semibold text-slate-900">Product not found</h1>
+        <h1 className="text-3xl font-semibold text-slate-900">
+          Product not found
+        </h1>
         <p className="mt-3 text-slate-600">
           This product is no longer available or may have been moved.
         </p>
@@ -230,14 +236,14 @@ const ProductDetailPage = () => {
   const selectedStock = selectedVariant?.stock ?? 0;
   const isInStock = selectedStock > 0;
 
-  const similarProducts = products.filter(
-    (p) => p.category.id === product.category.id && p.id !== product.id,
-  ).map((p) => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    image: p.images[0],
-  }));
+  const similarProducts = products
+    .filter((p) => p.category.id === product.category.id && p.id !== product.id)
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      image: p.images[0],
+    }));
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/70 pb-20">
@@ -271,7 +277,7 @@ const ProductDetailPage = () => {
                 className="h-[320px] w-full object-cover sm:h-[420px] lg:h-[520px]"
               />
               <span className="absolute left-4 top-4 rounded-full border border-white/40 bg-slate-900/80 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-                Premium Dental Catalog
+                Dental Catalog
               </span>
               <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 shadow">
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
@@ -316,7 +322,7 @@ const ProductDetailPage = () => {
                 </div>
                 <div className="inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
-                  Premium Choice
+                  Choice
                 </div>
               </div>
 
@@ -337,13 +343,17 @@ const ProductDetailPage = () => {
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                     Dispatch
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-800">24-48 Hours</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-800">
+                    24-48 Hours
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                     Warranty
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-800">Manufacturer-backed</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-800">
+                    Manufacturer-backed
+                  </p>
                 </div>
               </div>
             </div>
@@ -373,7 +383,9 @@ const ProductDetailPage = () => {
 
               {product.variants && product.variants.length > 0 && (
                 <div className="mt-7">
-                  <h3 className="text-sm font-semibold text-slate-800">Select Variant</h3>
+                  <h3 className="text-sm font-semibold text-slate-800">
+                    Select Variant
+                  </h3>
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {product.variants.map((variant) => (
                       <button
@@ -398,7 +410,9 @@ const ProductDetailPage = () => {
               )}
 
               <div className="mt-7">
-                <h3 className="text-sm font-semibold text-slate-800">Quantity</h3>
+                <h3 className="text-sm font-semibold text-slate-800">
+                  Quantity
+                </h3>
                 <div className="mt-3 inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
                   <button
                     onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
@@ -502,13 +516,17 @@ const ProductDetailPage = () => {
           {activeInfoTab === "overview" && (
             <div className="mt-6 grid gap-5 lg:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-                <h3 className="text-base font-semibold text-slate-900">Clinical Overview</h3>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Clinical Overview
+                </h3>
                 <p className="mt-2 text-sm leading-7 text-slate-600">
                   {product.description}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-                <h3 className="text-base font-semibold text-slate-900">Why Clinics Choose This</h3>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Why Clinics Choose This
+                </h3>
                 <ul className="mt-3 space-y-2 text-sm text-slate-600">
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 h-4 w-4 text-emerald-600" />
@@ -516,7 +534,7 @@ const ProductDetailPage = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 h-4 w-4 text-emerald-600" />
-                    Premium sourcing and quality-controlled catalog standards.
+                    Sourcing and quality-controlled catalog standards.
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 h-4 w-4 text-emerald-600" />
@@ -550,7 +568,9 @@ const ProductDetailPage = () => {
           {activeInfoTab === "shipping" && (
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 className="font-semibold text-slate-900">Dispatch Window</h4>
+                <h4 className="font-semibold text-slate-900">
+                  Dispatch Window
+                </h4>
                 <p className="mt-2 text-sm text-slate-600">
                   Most orders are prepared and dispatched within 24-48 hours.
                 </p>
@@ -558,13 +578,15 @@ const ProductDetailPage = () => {
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <h4 className="font-semibold text-slate-900">Order Support</h4>
                 <p className="mt-2 text-sm text-slate-600">
-                  Dedicated support for quotation, order updates, and delivery status.
+                  Dedicated support for quotation, order updates, and delivery
+                  status.
                 </p>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <h4 className="font-semibold text-slate-900">Returns Policy</h4>
                 <p className="mt-2 text-sm text-slate-600">
-                  Structured returns process for eligible products and order issues.
+                  Structured returns process for eligible products and order
+                  issues.
                 </p>
               </div>
             </div>
@@ -574,9 +596,7 @@ const ProductDetailPage = () => {
         <Checkout
           open={checkoutOpen}
           onClose={() => setCheckoutOpen(false)}
-          products={[
-            { id: product.id, name: product.name, price: finalPrice },
-          ]}
+          products={[{ id: product.id, name: product.name, price: finalPrice }]}
         />
 
         {similarProducts.length > 0 && (

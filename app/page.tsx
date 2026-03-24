@@ -75,10 +75,7 @@ const HomePage = () => {
     .sort((a, b) => b.price - a.price)
     .slice(0, 8);
 
-  const newProducts = [...sliderProducts]
-    .slice()
-    .reverse()
-    .slice(0, 8);
+  const newProducts = [...sliderProducts].slice().reverse().slice(0, 8);
 
   const brandBuckets = new Map<string, SliderProduct>();
   for (const p of sliderProducts) {
@@ -104,7 +101,7 @@ const HomePage = () => {
               Curated Collection
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-              Premium essentials for modern dental practice
+              Essentials for modern dental practice
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
               Explore verified equipment and supplies selected for reliability,

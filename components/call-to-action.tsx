@@ -9,7 +9,7 @@ const CallToAction = () => {
         contact us.
       </p>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+      <div className="flex flex-col items-center justify-center gap-6">
         <a
           href="tel:+251900000000"
           className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors"
