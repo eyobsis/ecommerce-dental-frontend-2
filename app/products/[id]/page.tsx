@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import CallToAction from "@/components/call-to-action";
 import Checkout from "@/components/check-out";
 import { ecommerceApi } from "@/lib/ecommerce-api";
+import { resolveProductImageUrl } from "@/lib/product-image";
 import type { IProduct } from "@/store/productStore";
 
 // NOTE: This PRODUCTS array was used as mock data for the
@@ -135,7 +136,9 @@ const ProductDetailPage = () => {
 
             const imageUrls =
               product.images && product.images.length > 0
-                ? product.images.map((img) => img.url)
+                ? product.images.map((img) =>
+                    resolveProductImageUrl(img.url),
+                  )
                 : ["/placeholder-product.jpg"];
 
             return {
@@ -243,6 +246,7 @@ const ProductDetailPage = () => {
       name: p.name,
       price: p.price,
       image: p.images[0],
+      categoryName: p.category.name,
     }));
 
   return (
@@ -252,21 +256,21 @@ const ProductDetailPage = () => {
         <div className="absolute right-0 top-36 h-72 w-72 rounded-full bg-cyan-200/25 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8 lg:pt-14">
-        <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
+      <div className="relative mx-auto max-w-7xl px-3 pt-6 sm:px-6 sm:pt-10 lg:px-8 lg:pt-14">
+        <div className="mb-5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 sm:mb-6 sm:gap-2 sm:text-sm">
           <span className="font-medium text-slate-700">Home</span>
           <ChevronRight className="h-3.5 w-3.5" />
           <span>Products</span>
           <ChevronRight className="h-3.5 w-3.5" />
           <span>{product.category.name}</span>
           <ChevronRight className="h-3.5 w-3.5" />
-          <span className="max-w-[220px] truncate font-medium text-slate-900 sm:max-w-none">
+          <span className="max-w-[180px] truncate font-medium text-slate-900 sm:max-w-[360px] lg:max-w-none">
             {product.name}
           </span>
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-[1.18fr_1fr] lg:gap-12">
-          <div className="space-y-5 rounded-3xl border border-slate-200/80 bg-white/85 p-3 shadow-[0_30px_80px_rgba(15,23,42,0.08)] sm:p-5">
+        <div className="grid gap-6 md:gap-8 lg:grid-cols-[1.18fr_1fr] lg:gap-12">
+          <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-white/85 p-2.5 shadow-[0_30px_80px_rgba(15,23,42,0.08)] sm:space-y-5 sm:p-5">
             <div className="relative overflow-hidden rounded-2xl bg-slate-100">
               <Image
                 src={selectedImage || product.images[0]}
@@ -274,7 +278,7 @@ const ProductDetailPage = () => {
                 width={1400}
                 height={900}
                 unoptimized
-                className="h-[320px] w-full object-cover sm:h-[420px] lg:h-[520px]"
+                className="h-[240px] w-full object-cover sm:h-[340px] md:h-[420px] lg:h-[520px]"
               />
               <span className="absolute left-4 top-4 rounded-full border border-white/40 bg-slate-900/80 px-3 py-1 text-xs font-medium text-white backdrop-blur">
                 Dental Catalog
@@ -286,12 +290,12 @@ const ProductDetailPage = () => {
             </div>
 
             {product.images.length > 1 && (
-              <div className="mt-4 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0">
+              <div className="mt-2 flex gap-2 overflow-x-auto pb-1 sm:mt-4 sm:grid sm:grid-cols-5 sm:gap-3 sm:overflow-visible sm:pb-0">
                 {product.images.map((img, index) => (
                   <button
                     key={`${img}-${index}`}
                     onClick={() => setSelectedImage(img)}
-                    className={`min-w-16 overflow-hidden rounded-xl border transition sm:min-w-0 ${
+                    className={`min-w-14 overflow-hidden rounded-xl border transition sm:min-w-0 ${
                       selectedImage === img
                         ? "border-slate-900 ring-2 ring-slate-900/20"
                         : "border-slate-200 hover:border-slate-400"
@@ -303,20 +307,20 @@ const ProductDetailPage = () => {
                       width={120}
                       height={120}
                       unoptimized
-                      className="h-16 w-16 object-cover sm:h-20 sm:w-full"
+                      className="h-14 w-14 object-cover sm:h-20 sm:w-full"
                     />
                   </button>
                 ))}
               </div>
             )}
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                     {product.category.name}
                   </p>
-                  <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-[2rem]">
+                  <h1 className="mt-2 text-xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-[2rem]">
                     {product.name}
                   </h1>
                 </div>
@@ -326,7 +330,7 @@ const ProductDetailPage = () => {
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid gap-2.5 sm:grid-cols-3 sm:gap-3">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                     Availability
@@ -360,12 +364,12 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="self-start lg:sticky lg:top-24">
-            <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-7">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-4 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-6 lg:p-7">
               <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Total Price
                 </p>
-                <div className="mt-2 flex items-end gap-3">
+                <div className="mt-2 flex flex-wrap items-end gap-2.5 sm:gap-3">
                   <p className="text-[1.75rem] font-bold tracking-tight text-slate-900 sm:text-3xl">
                     {finalPrice.toLocaleString()} ETB
                   </p>
@@ -466,7 +470,7 @@ const ProductDetailPage = () => {
                 </Button>
               </div>
 
-              <div className="mt-6 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
+              <div className="mt-6 grid gap-2.5 text-sm text-slate-600 sm:grid-cols-3 sm:gap-3">
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
                   <ShieldCheck className="h-4 w-4 text-slate-700" />
                   <span>Verified Quality</span>
@@ -488,7 +492,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        <div className="mt-10 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_55px_rgba(15,23,42,0.06)] sm:p-7">
+        <div className="mt-8 rounded-3xl border border-slate-200/80 bg-white/90 p-4 shadow-[0_20px_55px_rgba(15,23,42,0.06)] sm:mt-10 sm:p-7">
           <div className="flex flex-wrap gap-2">
             {[
               { key: "overview", label: "Overview" },
@@ -502,7 +506,7 @@ const ProductDetailPage = () => {
                     tab.key as "overview" | "features" | "shipping",
                   )
                 }
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                className={`rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm ${
                   activeInfoTab === tab.key
                     ? "bg-slate-900 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -600,7 +604,7 @@ const ProductDetailPage = () => {
         />
 
         {similarProducts.length > 0 && (
-          <div className="mt-16">
+          <div className="mt-10 sm:mt-16">
             <ProductSliderSection
               title="Similar Products"
               products={similarProducts}

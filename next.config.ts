@@ -17,10 +17,6 @@ module.exports = {
         hostname: "tse2.mm.bing.net",
       },
       {
-        protocol: "https",
-        hostname: "via.placeholder.com",
-      },
-      {
         protocol: "http",
         hostname: "localhost",
         port: "3001",

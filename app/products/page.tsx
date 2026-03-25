@@ -12,8 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { useCartStore } from "@/store/productStore";
 import { ecommerceApi } from "@/lib/ecommerce-api";
+import { resolveProductImageUrl } from "@/lib/product-image";
 import { Input } from "@/components/ui/input";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpRight, Search, ShieldCheck, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ProductFilterOptions } from "@/types/ecommerce";
 import {
@@ -47,16 +48,6 @@ interface Product {
   categoryId: string | null;
   categoryName: string;
 }
-
-const backendUrl =
-  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ||
-  "http://localhost:3001";
-
-const toAbsoluteUrl = (value?: string | null) => {
-  if (!value) return "/placeholder-product.jpg";
-  if (/^https?:\/\//i.test(value)) return value;
-  return `${backendUrl}/${value.replace(/^\/+/, "")}`;
-};
 
 const parseListQuery = (value: string | null) => {
   if (!value) return [] as string[];
@@ -346,7 +337,7 @@ export default function ProductsPage() {
           price: Number(product.price),
           image:
             product.images && product.images.length > 0
-              ? toAbsoluteUrl(product.images[0].url)
+              ? resolveProductImageUrl(product.images[0].url)
               : "/placeholder-product.jpg",
           categoryId: product.categoryId ?? null,
           categoryName: product.categoryName || "Uncategorized",
@@ -406,10 +397,31 @@ export default function ProductsPage() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
+  const visiblePages = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, totalPages];
+    }
+
+    if (currentPage >= totalPages - 2) {
+      return [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
+  }, [currentPage, totalPages]);
 
   return (
-    <div className="container mx-auto px-6 py-16">
-      <div className="flex flex-col md:flex-row gap-8">
+    <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/70">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-16 top-24 h-64 w-64 rounded-full bg-cyan-200/25 blur-3xl" />
+        <div className="absolute right-0 top-44 h-72 w-72 rounded-full bg-amber-100/30 blur-3xl" />
+      </div>
+
+      <div className="relative container mx-auto px-3 py-8 sm:px-4 sm:py-10 lg:px-6 lg:py-14">
+        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
         <div className="hidden md:block">
           <ProductFiltersSidebar
             loading={filterOptionsLoading}
@@ -429,17 +441,35 @@ export default function ProductsPage() {
 
         {/* Products */}
         <div className="flex-1">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-2xl font-semibold">Products</h2>
+          <div className="mb-5 rounded-3xl border border-slate-200/80 bg-white/90 p-4 shadow-[0_20px_55px_rgba(15,23,42,0.06)] backdrop-blur sm:mb-6 sm:p-6">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                  Premium Catalog
+                </p>
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                  Products
+                </h2>
+                <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                  Curated equipment and supplies for modern dental clinics.
+                </p>
+              </div>
 
-            <div className="flex w-full flex-col gap-3 sm:max-w-3xl sm:flex-row">
-              <div className="relative w-full sm:max-w-md">
+              <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+                <ShieldCheck className="h-4 w-4" />
+                Quality Verified Listings
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-2.5 sm:gap-3 lg:max-w-4xl lg:flex-row">
+              <div className="relative w-full lg:max-w-md">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search products by name..."
-                  className="pl-9 pr-9"
+                  className="h-10 rounded-xl border-slate-300 bg-white pl-9 pr-9"
                 />
                 {searchTerm && (
                   <button
@@ -455,7 +485,7 @@ export default function ProductsPage() {
               <select
                 value={sortValue}
                 onChange={(event) => setSortValue(event.target.value as SortValue)}
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 lg:w-52"
                 aria-label="Sort products"
               >
                 {SORT_OPTIONS.map((option) => (
@@ -467,7 +497,7 @@ export default function ProductsPage() {
 
               <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="md:hidden">
+                  <Button variant="outline" className="h-10 w-full rounded-xl border-slate-300 bg-white md:hidden">
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     Filters
                   </Button>
@@ -501,12 +531,12 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p className="mb-4 text-xs text-slate-500 sm:text-sm">
             {filteredProducts.length} product{filteredProducts.length === 1 ? "" : "s"} found
           </p>
 
           {activeFilterCount > 0 && (
-            <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-2">
+            <div className="mb-4 flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-white/85 p-2.5 shadow-sm sm:gap-2">
               {filters.categoryId.map((value) => (
                 <Button
                   key={`category-${value}`}
@@ -638,7 +668,7 @@ export default function ProductsPage() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 px-2 text-xs"
+                className="h-7 rounded-full border border-slate-200 px-2.5 text-xs text-slate-700"
                 onClick={clearAllFilters}
               >
                 Clear all
@@ -651,9 +681,9 @@ export default function ProductsPage() {
           )}
 
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 min-[500px]:grid-cols-2 md:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
               {Array.from({ length: pageSize }).map((_, i) => (
-                <Skeleton key={i} className="h-60 w-full rounded-xl" />
+                <Skeleton key={i} className="h-72 w-full rounded-2xl" />
               ))}
             </div>
           ) : (
@@ -663,11 +693,11 @@ export default function ProductsPage() {
                   No products found for the selected filters.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 min-[500px]:grid-cols-2 md:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
                   {paginatedProducts.map((product) => (
                     <Card
                       key={product.id}
-                      className="group relative overflow-hidden rounded-xl border p-3 transition hover:-translate-y-0.5 hover:shadow-lg"
+                      className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-2.5 shadow-[0_14px_34px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_24px_44px_rgba(15,23,42,0.12)] sm:p-3"
                     >
                       {/* Product Image */}
                       <div className="relative overflow-hidden rounded-lg">
@@ -676,42 +706,48 @@ export default function ProductsPage() {
                           alt={product.name}
                           width={480}
                           height={192}
-                          className="h-36 w-full object-cover transition duration-300 group-hover:scale-105"
+                          unoptimized
+                          sizes="(max-width: 499px) 100vw, (max-width: 1279px) 50vw, 25vw"
+                          className="h-36 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-40"
                         />
 
                         {/* Category Badge */}
-                        <span className="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">
+                        <span className="absolute left-2 top-2 max-w-[72%] truncate rounded-full border border-white/60 bg-slate-900/88 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-white shadow">
                           {product.categoryName}
                         </span>
 
-                        {/* Wishlist Icon */}
-                        <button
-                          className="absolute top-2 right-2 bg-white rounded-full p-2 shadow hover:bg-gray-100"
-                          aria-label="Add to wishlist"
-                        >
-                          ❤️
-                        </button>
+                        <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/92 px-2 py-1 text-[10px] font-semibold text-slate-700 shadow-sm">
+                          <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                          Trusted
+                        </span>
+
                       </div>
 
                       {/* Product Info */}
-                      <div className="mt-3">
-                        <h3 className="line-clamp-1 text-sm font-semibold sm:text-base">
+                      <div className="mt-3.5">
+                        <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-slate-900 sm:line-clamp-1 sm:min-h-0 sm:text-base">
                           {product.name}
                         </h3>
-                        <p className="mt-1 text-sm font-bold text-primary">
+                        <p className="mt-1.5 text-base font-bold tracking-tight text-slate-900">
                           {product.price.toLocaleString()} ETB
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-500">
+                          Premium-grade clinical supply
                         </p>
                       </div>
 
                       {/* Actions */}
-                      <div className="mt-3 flex gap-2">
-                        <Link href={`/products/${product.id}`} className="flex-1">
-                          <Button size="sm" className="w-full text-xs sm:text-sm">View Details</Button>
+                      <div className="mt-3 grid grid-cols-1 gap-2 min-[520px]:grid-cols-2">
+                        <Link href={`/products/${product.id}`}>
+                          <Button size="sm" variant="outline" className="h-10 w-full rounded-xl border-slate-300 text-xs font-medium text-slate-700 sm:text-sm">
+                            View Details
+                            <ArrowUpRight className="ml-1 hidden h-3.5 w-3.5 min-[380px]:inline" />
+                          </Button>
                         </Link>
                         <Button
-                          variant="secondary"
+                          variant="default"
                           size="sm"
-                          className="flex-1"
+                          className="h-10 rounded-xl bg-slate-900 text-xs font-medium text-white hover:bg-slate-800 sm:text-sm"
                           onClick={() => handleAddToCart(product)}
                         >
                           Add to Cart
@@ -724,27 +760,45 @@ export default function ProductsPage() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/85 p-2.5 shadow-sm">
                   <Button
                     variant="outline"
+                    size="sm"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((prev) => prev - 1)}
                   >
                     Previous
                   </Button>
 
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <Button
-                      key={i}
-                      variant={currentPage === i + 1 ? "default" : "outline"}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
+                  <span className="px-2 text-xs text-muted-foreground sm:hidden">
+                    Page {currentPage} of {totalPages}
+                  </span>
+
+                  <div className="hidden items-center gap-1 sm:flex">
+                    {visiblePages.map((page, index) => {
+                      const previous = visiblePages[index - 1];
+                      const showGap = previous && page - previous > 1;
+
+                      return (
+                        <div key={page} className="flex items-center gap-1">
+                          {showGap ? (
+                            <span className="px-1 text-sm text-muted-foreground">...</span>
+                          ) : null}
+                          <Button
+                            size="sm"
+                            variant={currentPage === page ? "default" : "outline"}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
 
                   <Button
                     variant="outline"
+                    size="sm"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((prev) => prev + 1)}
                   >
@@ -754,6 +808,7 @@ export default function ProductsPage() {
               )}
             </>
           )}
+        </div>
         </div>
       </div>
     </div>

@@ -91,7 +91,7 @@ export default function EcommerceHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/92 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur supports-[backdrop-filter]:bg-white/88">
-      <div className="container mx-auto flex h-18 items-center justify-between gap-3 px-4 py-2 md:h-20 md:py-2.5">
+      <div className="container mx-auto flex h-18 items-center justify-between gap-2 px-2.5 py-2 sm:gap-3 sm:px-4 md:h-20 md:py-2.5">
         {/* Logo */}
         <Link
           href="/"
@@ -105,7 +105,7 @@ export default function EcommerceHeader() {
             priority
             className="h-[66%] w-auto object-contain"
           />
-          <span className="text-sm font-semibold tracking-tight text-slate-900 md:text-base">
+          <span className="hidden text-sm font-semibold tracking-tight text-slate-900 min-[360px]:inline md:text-base">
             Royal Dental
           </span>
         </Link>
@@ -159,11 +159,11 @@ export default function EcommerceHeader() {
         </form>
 
         {/* Actions */}
-        <div className="flex items-center gap-1.5 md:gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           {/* ACCOUNT SECTION (UPDATED ONLY HERE) */}
           {!session && (
             <Link href="/auth">
-              <Button variant="ghost" className="h-9 rounded-lg px-3 text-slate-700 hover:bg-slate-100">
+              <Button variant="ghost" className="h-9 rounded-lg px-2.5 text-slate-700 hover:bg-slate-100 sm:px-3">
                 <User className="h-5 w-5" />
                 <span className="hidden md:inline">Login</span>
               </Button>
@@ -174,7 +174,7 @@ export default function EcommerceHeader() {
             <div className="relative" ref={dropdownRef}>
               <Button
                 variant="ghost"
-                className="h-9 rounded-lg px-3 text-slate-700 hover:bg-slate-100"
+                className="h-9 rounded-lg px-2.5 text-slate-700 hover:bg-slate-100 sm:px-3"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <User className="h-5 w-5" />
@@ -216,7 +216,7 @@ export default function EcommerceHeader() {
 
           {/* CART (UNCHANGED) */}
           <Link href="/cart" className="relative">
-            <Button variant="ghost" className="h-9 rounded-lg px-3 text-slate-700 hover:bg-slate-100">
+            <Button variant="ghost" className="h-9 rounded-lg px-2.5 text-slate-700 hover:bg-slate-100 sm:px-3">
               <ShoppingCart className="h-5 w-5" />
               <span className="hidden md:inline">Cart</span>
             </Button>
@@ -230,12 +230,12 @@ export default function EcommerceHeader() {
       </div>
 
       {/* Mobile search */}
-      <div className="px-4 pb-3 md:hidden">
+      <div className="px-2.5 pb-3 sm:px-4 md:hidden">
         <form onSubmit={handleSearch} className="flex">
           <Input
             name="search"
             placeholder="Search products..."
-            className="h-9 rounded-l-xl border-slate-300 bg-white shadow-sm"
+            className="h-9 rounded-l-xl border-slate-300 bg-white text-sm shadow-sm"
           />
           <Button type="submit" className="h-9 rounded-l-none rounded-r-xl bg-slate-900 hover:bg-slate-800">
             <Search className="h-4 w-4" />
@@ -243,7 +243,7 @@ export default function EcommerceHeader() {
         </form>
       </div>
 
-      <div className="border-t border-slate-200 bg-slate-50/80 px-4 py-2 lg:hidden">
+      <div className="border-t border-slate-200 bg-slate-50/80 px-2.5 py-2 sm:px-4 lg:hidden">
         <div className="container mx-auto flex items-center gap-2 overflow-x-auto">
           <Link href="/" className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
             Home

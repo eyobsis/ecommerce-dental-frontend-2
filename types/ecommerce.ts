@@ -29,6 +29,7 @@ export type Product = {
   id: string;
   name: string;
   price: string | number;
+  createdAt?: string | null;
   description?: string | null;
   categoryId?: string | null;
   categoryName?: string | null;
