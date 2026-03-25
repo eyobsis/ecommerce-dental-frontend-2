@@ -93,8 +93,10 @@ export const normalizeOrderUserId = (value?: string | null) =>
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const hasBody = init.body !== undefined;
+  const isFormData =
+    typeof FormData !== "undefined" && init.body instanceof FormData;
   const headers: HeadersInit = {
-    ...(hasBody ? { "Content-Type": "application/json" } : {}),
+    ...(hasBody && !isFormData ? { "Content-Type": "application/json" } : {}),
     ...(init.headers || {}),
   };
 
@@ -193,50 +195,56 @@ export const ecommerceApi = {
     return request<ApiResponse<Product>>(`/products/${id}`);
   },
 
-  async createProduct(data: {
-    name: string;
-    price: string;
-    description?: string;
-    categoryId?: string;
-    features?: Array<string | { feature: string; featureKey?: string; featureValue?: string }>;
-    variants?: Array<{
-      name: string;
-      sku?: string;
-      color?: string;
-      size?: string;
-      additionalPrice?: string;
-      stock?: number;
-    }>;
-    images?: string[];
-  }) {
+  async createProduct(
+    data:
+      | {
+          name: string;
+          price: string;
+          description?: string;
+          categoryId?: string;
+          features?: Array<string | { feature: string; featureKey?: string; featureValue?: string }>;
+          variants?: Array<{
+            name: string;
+            sku?: string;
+            color?: string;
+            size?: string;
+            additionalPrice?: string;
+            stock?: number;
+          }>;
+          images?: string[];
+        }
+      | FormData,
+  ) {
     return request<ApiResponse<Product>>("/products", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
   },
 
   async updateProduct(
     id: string,
-    data: {
-      name?: string;
-      price?: string;
-      description?: string;
-      categoryId?: string;
-      features?: Array<string | { feature: string; featureKey?: string; featureValue?: string }>;
-      variants?: Array<{
-        name: string;
-        sku?: string;
-        color?: string;
-        size?: string;
-        additionalPrice?: string;
-        stock?: number;
-      }>;
-      images?: string[];
-    },
+    data:
+      | {
+          name?: string;
+          price?: string;
+          description?: string;
+          categoryId?: string;
+          features?: Array<string | { feature: string; featureKey?: string; featureValue?: string }>;
+          variants?: Array<{
+            name: string;
+            sku?: string;
+            color?: string;
+            size?: string;
+            additionalPrice?: string;
+            stock?: number;
+          }>;
+          images?: string[];
+        }
+      | FormData,
   ) {
     return request<ApiResponse<Product>>(`/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
   },
 

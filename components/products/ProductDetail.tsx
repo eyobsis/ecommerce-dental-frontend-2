@@ -202,10 +202,10 @@ const ProductDetail = ({ product }: { product: IProduct }) => {
     newCompanyDiscount.discountPercentage > 100;
 
   return (
-    <ScrollArea className="h-[95vh]">
-      <Card>
+    <ScrollArea className="h-[95vh] px-2 sm:px-4">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>{formData.prod_name}</CardTitle>
+          <CardTitle className="break-words">{formData.prod_name}</CardTitle>
           <CardDescription>
             Manage product details and discount configurations.
           </CardDescription>
@@ -304,7 +304,8 @@ const ProductDetail = ({ product }: { product: IProduct }) => {
             </h3>
             <Card>
               <CardContent className="pt-6">
-                <Table>
+                <div className="w-full overflow-x-auto">
+                  <Table className="min-w-[520px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Company Name</TableHead>
@@ -344,7 +345,8 @@ const ProductDetail = ({ product }: { product: IProduct }) => {
                       </TableRow>
                     )}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
 
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-end border-t pt-4">
                   <div>
@@ -399,6 +401,7 @@ const ProductDetail = ({ product }: { product: IProduct }) => {
 
                   <Button
                     onClick={handleAddCompanyDiscount}
+                    className="w-full md:w-auto"
                     disabled={isAddButtonDisabled}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" /> Add Discount
@@ -409,9 +412,13 @@ const ProductDetail = ({ product }: { product: IProduct }) => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-end gap-2">
-          <Button variant="outline">Cancel</Button>
-          <Button onClick={handleSaveChanges}>Save Changes</Button>
+        <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <Button className="w-full sm:w-auto" variant="outline">
+            Cancel
+          </Button>
+          <Button className="w-full sm:w-auto" onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
         </CardFooter>
       </Card>
     </ScrollArea>

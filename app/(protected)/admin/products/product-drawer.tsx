@@ -10,8 +10,10 @@ import {
   Select,
   Divider,
   Card,
+  Upload,
   message,
 } from "antd";
+import type { UploadFile } from "antd/es/upload/interface";
 import { useProductsStore, Product } from "@/store/product.store";
 import { useState, useEffect } from "react";
 
@@ -27,7 +29,6 @@ interface FormValues {
   description?: string;
   categoryId?: string;
   features?: string[];
-  images?: Array<{ url?: string }>;
   variants?: Array<{
     name: string;
     additionalPrice?: number;
@@ -39,16 +40,18 @@ export const ProductDrawer = ({ open, onClose, product }: Props) => {
   const [form] = Form.useForm();
   const { categories, addProduct, updateProduct } = useProductsStore();
   const [loading, setLoading] = useState(false);
+  const [imageFileList, setImageFileList] = useState<UploadFile[]>([]);
 
   // Prefill form when editing
   useEffect(() => {
     if (product) {
       form.setFieldsValue({
         ...product,
-        images: (product.images || []).map((url) => ({ url })),
       });
+      setImageFileList([]);
     } else {
       form.resetFields();
+      setImageFileList([]);
     }
   }, [product, form]);
 
@@ -68,9 +71,9 @@ export const ProductDrawer = ({ open, onClose, product }: Props) => {
       .map((feature) => feature.trim())
       .filter((feature) => feature.length > 0);
 
-    const imageUrls = (values.images || [])
-      .map((image) => image?.url?.trim() || "")
-      .filter((url) => url.length > 0);
+    const imageFiles = imageFileList
+      .map((file) => file.originFileObj)
+      .filter((file): file is File => file instanceof File);
 
     const payload = {
       name: values.name.trim(),
@@ -78,7 +81,8 @@ export const ProductDrawer = ({ open, onClose, product }: Props) => {
       description: values.description,
       categoryId: values.categoryId,
       features: featureValues,
-      images: imageUrls,
+      images: product?.images || [],
+      imageFiles,
       variants: variants.map((variant) => ({
         id: "",
         name: variant.name.trim(),
@@ -186,34 +190,25 @@ export const ProductDrawer = ({ open, onClose, product }: Props) => {
         <Divider />
 
         {/* IMAGES */}
-        <Card title="Product Image URLs">
-          <Form.List name="images">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map((field) => (
-                  <Space
-                    key={field.key}
-                    style={{ display: "flex", marginBottom: 8 }}
-                  >
-                    <Form.Item
-                      name={[field.name, "url"]}
-                      rules={[{ type: "url", message: "Enter a valid image URL" }]}
-                    >
-                      <Input placeholder="https://example.com/product-image.jpg" />
-                    </Form.Item>
+        <Card title="Product Images">
+          {product?.images?.length ? (
+            <p className="mb-3 text-sm text-gray-500">
+              Existing images: {product.images.length}. New uploads are added when you update this product.
+            </p>
+          ) : null}
 
-                    <Button danger onClick={() => remove(field.name)}>
-                      Remove
-                    </Button>
-                  </Space>
-                ))}
-
-                <Button type="dashed" onClick={() => add()} block>
-                  + Add Image URL
-                </Button>
-              </>
-            )}
-          </Form.List>
+          <Upload
+            accept="image/*"
+            listType="picture"
+            multiple
+            beforeUpload={() => false}
+            fileList={imageFileList}
+            onChange={({ fileList }) => setImageFileList(fileList)}
+          >
+            <Button type="dashed" block>
+              + Add Image Files
+            </Button>
+          </Upload>
         </Card>
 
         <Divider />

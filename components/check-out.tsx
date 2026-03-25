@@ -164,9 +164,9 @@ export default function CheckoutModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl rounded-2xl border-slate-200 bg-white p-0 shadow-[0_30px_90px_rgba(15,23,42,0.25)]">
-        <DialogHeader className="border-b bg-gradient-to-r from-slate-50 via-white to-slate-100 px-6 pb-4 pt-6">
-          <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-slate-900">
+      <DialogContent className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-4xl overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-[0_30px_90px_rgba(15,23,42,0.25)]">
+        <DialogHeader className="border-b bg-gradient-to-r from-slate-50 via-white to-slate-100 px-4 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-6">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 sm:text-xl">
             <CreditCard className="h-5 w-5" />
             Secure Checkout
           </DialogTitle>
@@ -176,9 +176,9 @@ export default function CheckoutModal({
           </p>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 px-6 py-6 md:grid-cols-2">
+        <div className="grid max-h-[calc(92vh-9rem)] grid-cols-1 gap-4 overflow-y-auto px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 md:grid-cols-2">
           {/* LEFT SIDE */}
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
             <p className="mb-1 text-sm font-semibold text-slate-800">
               Delivery & Contact
             </p>
@@ -244,19 +244,19 @@ export default function CheckoutModal({
           </div>
 
           {/* RIGHT SIDE (SUMMARY) */}
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-sm">
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm sm:p-4">
             <p className="text-lg font-semibold text-slate-900">
               Order Summary
             </p>
 
-            <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+            <div className="max-h-64 space-y-3 overflow-y-auto pr-1 sm:max-h-72">
               {items.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/70 p-3"
+                  className="flex flex-col items-start gap-1 rounded-lg border border-slate-200 bg-slate-50/70 p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
-                    <p className="font-medium text-slate-800">{p.name}</p>
+                  <div className="min-w-0">
+                    <p className="break-words font-medium text-slate-800">{p.name}</p>
                     <p className="text-xs text-slate-500">Qty: {p.quantity}</p>
                   </div>
                   <span className="font-semibold text-slate-900">
@@ -273,7 +273,7 @@ export default function CheckoutModal({
           </div>
         </div>
 
-        <DialogFooter className="border-t bg-slate-50 px-6 py-4">
+        <DialogFooter className="border-t bg-slate-50 px-4 py-3 sm:px-6 sm:py-4">
           <Button
             onClick={handleSubmit}
             disabled={!isValid || loading}
