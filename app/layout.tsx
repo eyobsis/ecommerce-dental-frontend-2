@@ -10,6 +10,11 @@ import { ReactQueryProvider } from "@/components/provider/react-query-provider";
 import { Toaster } from "sonner";
 import { ToastContainer } from "react-toastify";
 import { redirect } from "next/navigation";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
 
 export default async function RootLayout({
   children,
@@ -44,7 +49,7 @@ export default async function RootLayout({
     redirect("/admin/dashboard");
   }
   return (
-    <html>
+    <html className={cn("font-sans", geist.variable)}>
       <body>
         <ReactQueryProvider>
           <UserProvider session={session}>
