@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -26,14 +26,36 @@ import {
   Box,
 } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { useDashboardStore } from "@/store/dashboard.store";
+import { DashboardFilters, FilterParams } from "@/components/admin-dashboard/DashboardFilters";
 
 const DashboardPage = () => {
   const { stats, loading, error, fetchDashboardStats } = useDashboardStore();
+  const [filterParams, setFilterParams] = useState<FilterParams>(() => {
+    if (typeof window !== "undefined") {
+      const saved = window.localStorage.getItem("dashboardFilterParams");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === "object") return parsed;
+        } catch {}
+      }
+    }
+    return { filter: "today" };
+  });
+
+  // Persist filterParams to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("dashboardFilterParams", JSON.stringify(filterParams));
+    }
+  }, [filterParams]);
 
   useEffect(() => {
-    fetchDashboardStats();
-  }, [fetchDashboardStats]);
+    fetchDashboardStats(filterParams);
+  }, [filterParams]);
 
   // Premium Skeleton Loader
   if (loading) {
@@ -102,13 +124,17 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20 font-sans">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12">
-        
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-white pb-20 font-sans">
+      <div className="max-w-[1600px] mx-auto px-2 sm:px-6 lg:px-8 pt-8 md:pt-12">
+        {/* Dashboard Filters UI */}
+        <div className="mb-8">
+          <DashboardFilters onChange={setFilterParams} activeFilter={filterParams.filter} />
+        </div>
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+              <BarChart2 className="h-8 w-8 text-indigo-500" />
               Overview
             </h1>
             <p className="mt-2 text-slate-500 font-medium flex items-center gap-2">
@@ -117,7 +143,7 @@ const DashboardPage = () => {
             </p>
           </div>
         </div>
-
+        <Separator className="mb-8" />
         {/* Top KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <KpiCard
@@ -125,36 +151,35 @@ const DashboardPage = () => {
             value={`ETB ${totalRevenue.toLocaleString()}`}
             trend="+8.2%"
             icon={<DollarSign className="h-6 w-6 text-emerald-600" />}
-            iconBg="bg-emerald-100/80"
+            iconBg="bg-gradient-to-br from-emerald-100/80 to-emerald-50"
           />
           <KpiCard
             title="Total Orders"
             value={totalOrders.toLocaleString()}
             trend="+14.1%"
             icon={<ShoppingCart className="h-6 w-6 text-blue-600" />}
-            iconBg="bg-blue-100/80"
+            iconBg="bg-gradient-to-br from-blue-100/80 to-blue-50"
           />
           <KpiCard
             title="Total Products"
             value={totalProducts.toString()}
             icon={<Layers className="h-6 w-6 text-violet-600" />}
-            iconBg="bg-violet-100/80"
+            iconBg="bg-gradient-to-br from-violet-100/80 to-violet-50"
           />
           <KpiCard
             title="Inventory Alerts"
             value={`${lowStockVariants} low stock`}
             subtext={`${outOfStockProducts} out of stock`}
             icon={<AlertTriangle className="h-6 w-6 text-rose-600" />}
-            iconBg="bg-rose-100/80"
+            iconBg="bg-gradient-to-br from-rose-100/80 to-rose-50"
             alert
           />
         </div>
 
         {/* Middle Section: Chart & Order Status */}
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 mb-8">
-          
           {/* Chart */}
-          <Card className="lg:col-span-4 rounded-3xl border-0 shadow-sm ring-1 ring-slate-900/5 bg-white overflow-hidden">
+          <Card className="lg:col-span-4 rounded-3xl border-0 shadow-md ring-1 ring-indigo-100 bg-white overflow-hidden">
             <CardHeader className="px-8 pt-8 pb-4">
               <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <BarChart2 className="h-5 w-5 text-indigo-500" />
@@ -211,9 +236,8 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-
           {/* Order Status */}
-          <Card className="lg:col-span-3 rounded-3xl border-0 shadow-sm ring-1 ring-slate-900/5 bg-white">
+          <Card className="lg:col-span-3 rounded-3xl border-0 shadow-md ring-1 ring-indigo-100 bg-white">
             <CardHeader className="px-8 pt-8 pb-6">
               <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <Box className="h-5 w-5 text-indigo-500" />
@@ -227,10 +251,13 @@ const DashboardPage = () => {
                   return (
                     <div
                       key={status}
-                      className="group relative overflow-hidden rounded-2xl p-5 border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                      className={cn(
+                        "group relative overflow-hidden rounded-2xl p-5 border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors",
+                        style.bg
+                      )}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className={`p-2 rounded-xl ${style.bg} ${style.color}`}>
+                        <div className={cn("p-2 rounded-xl", style.color)}>
                           {style.icon}
                         </div>
                         <span className="text-sm font-medium text-slate-600 truncate">
@@ -254,8 +281,8 @@ const DashboardPage = () => {
             title="Top by Revenue"
             icon={<Trophy className="h-5 w-5 text-yellow-500" />}
             items={topProductsByRevenue}
-            render={(p) => (
-              <span className="font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md text-sm">
+            render={(p: typeof topProductsByRevenue[number]) => (
+              <span className="font-semibold text-emerald-600 bg-gradient-to-br from-emerald-50 to-white px-2 py-1 rounded-md text-sm">
                 ETB {p.revenue.toLocaleString()}
               </span>
             )}
@@ -264,8 +291,8 @@ const DashboardPage = () => {
             title="Top by Volume"
             icon={<TrendingUp className="h-5 w-5 text-blue-500" />}
             items={topProductsByQuantity}
-            render={(p) => (
-              <span className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
+            render={(p: typeof topProductsByQuantity[number]) => (
+              <span className="font-semibold text-blue-600 bg-gradient-to-br from-blue-50 to-white px-2 py-1 rounded-md text-sm">
                 {p.quantitySold.toLocaleString()} units
               </span>
             )}
@@ -274,8 +301,8 @@ const DashboardPage = () => {
             title="Most Frequent"
             icon={<Clock className="h-5 w-5 text-violet-500" />}
             items={topProductsByOrders}
-            render={(p) => (
-              <span className="font-semibold text-violet-600 bg-violet-50 px-2 py-1 rounded-md text-sm">
+            render={(p: typeof topProductsByOrders[number]) => (
+              <span className="font-semibold text-violet-600 bg-gradient-to-br from-violet-50 to-white px-2 py-1 rounded-md text-sm">
                 {p.orderCount ?? "?"} orders
               </span>
             )}
@@ -283,10 +310,9 @@ const DashboardPage = () => {
         </div>
 
         {/* High-Contrast Bottom Banner */}
-        <div className="rounded-3xl bg-slate-900 text-white overflow-hidden shadow-xl shadow-slate-900/10 relative">
+        <div className="rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-700 to-indigo-600 text-white overflow-hidden shadow-xl shadow-slate-900/10 relative">
           {/* Subtle background glow effect */}
           <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl" />
-          
           <div className="relative p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
               <p className="text-indigo-200 font-medium mb-2 flex items-center gap-2">
@@ -300,17 +326,16 @@ const DashboardPage = () => {
                 Current total valuation based on standard retail pricing.
               </p>
             </div>
-            
-            <div className="flex gap-6 border-t md:border-t-0 md:border-l border-slate-700/50 pt-6 md:pt-0 md:pl-10 w-full md:w-auto">
+            <div className="flex gap-6 border-t md:border-t-0 md:border-l border-indigo-400/30 pt-6 md:pt-0 md:pl-10 w-full md:w-auto">
               <div>
-                <p className="text-slate-400 text-sm mb-1">Out of Stock</p>
-                <p className={`text-3xl font-bold ${outOfStockProducts > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                <p className="text-slate-200 text-sm mb-1">Out of Stock</p>
+                <p className={`text-3xl font-bold ${outOfStockProducts > 0 ? "text-rose-300" : "text-emerald-300"}`}>
                   {outOfStockProducts}
                 </p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-1">Low Stock</p>
-                <p className="text-3xl font-bold text-amber-400">
+                <p className="text-slate-200 text-sm mb-1">Low Stock</p>
+                <p className="text-3xl font-bold text-amber-300">
                   {lowStockVariants}
                 </p>
               </div>
@@ -327,7 +352,16 @@ export default DashboardPage;
 
 // ── Reusable Premium Components ──────────────────────────────────────────────
 
-function KpiCard({ title, value, icon, iconBg, trend, subtext, alert }: any) {
+interface KpiCardProps {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  trend?: string;
+  subtext?: string;
+  alert?: boolean;
+}
+function KpiCard({ title, value, icon, iconBg, trend, subtext, alert }: KpiCardProps) {
   return (
     <Card className="rounded-3xl border-0 shadow-sm ring-1 ring-slate-900/5 bg-white relative overflow-hidden transition-all hover:shadow-md">
       {alert && <div className="absolute top-0 left-0 w-full h-1 bg-rose-500" />}
@@ -353,7 +387,17 @@ function KpiCard({ title, value, icon, iconBg, trend, subtext, alert }: any) {
   );
 }
 
-function TopList({ title, items, render, icon }: any) {
+interface TopListItemBase {
+  id: string;
+  name: string;
+}
+type TopListProps<T extends TopListItemBase> = {
+  title: string;
+  items: T[];
+  render: (p: T) => React.ReactNode;
+  icon: React.ReactNode;
+};
+function TopList<T extends TopListItemBase>({ title, items, render, icon }: TopListProps<T>) {
   return (
     <div className="rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 p-6 flex flex-col h-full">
       <h3 className="font-semibold text-slate-900 mb-6 flex items-center gap-2">
@@ -361,7 +405,7 @@ function TopList({ title, items, render, icon }: any) {
         {title}
       </h3>
       <div className="flex-1 flex flex-col gap-1">
-        {items.slice(0, 5).map((p: any, i: number) => (
+        {items.slice(0, 5).map((p, i) => (
           <div
             key={p.id}
             className="group flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors"

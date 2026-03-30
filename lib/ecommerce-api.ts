@@ -296,8 +296,24 @@ export const ecommerceApi = {
     });
   },
 
-  async getDashboardStats() {
-    return request("/dashboard");
+  async getDashboardStats(params?: {
+    filter?: string;
+    from?: Date | string;
+    to?: Date | string;
+  }) {
+    const query = new URLSearchParams();
+
+    if (params?.filter) query.set("filter", params.filter);
+
+    if (params?.from && params?.to) {
+      const fromStr = params.from instanceof Date ? params.from.toISOString() : params.from;
+      const toStr = params.to instanceof Date ? params.to.toISOString() : params.to;
+      query.set("from", fromStr);
+      query.set("to", toStr);
+    }
+
+    const queryString = query.toString();
+    return request(`/dashboard${queryString ? `?${queryString}` : ""}`);
   },
 
   async getOrders() {

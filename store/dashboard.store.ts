@@ -66,38 +66,45 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   loading: false,
   error: null,
 
-  fetchDashboardStats: async () => {
+  fetchDashboardStats: async (params?: {
+    filter?: string;
+    from?: Date;
+    to?: Date;
+  }): Promise<void> => {
     set({ loading: true, error: null });
 
     try {
-      const response = (await ecommerceApi.getDashboardStats()) as DashboardApiResponse;
+      const res = await ecommerceApi.getDashboardStats(params) as DashboardApiResponse;
 
-      if (!response.success) {
-        throw new Error(
-          response.message || "Failed to fetch dashboard statistics",
-        );
+      if (!res || typeof res !== 'object') {
+        throw new Error('No response from server');
+      }
+
+      if (!('success' in res)) {
+        throw new Error('Malformed response from server');
+      }
+
+      if (!res.success) {
+        throw new Error(res.message || 'Failed to fetch dashboard statistics');
       }
 
       set({
-        stats: response.data,
+        stats: res.data,
         loading: false,
         error: null,
       });
-    } catch (err: unknown) {
-      let message = "Failed to load dashboard data";
-
+    } catch (err) {
+      let message = 'Failed to load dashboard data';
       if (err instanceof ApiError) {
         message = `${err.message} (status ${err.status})`;
       } else if (err instanceof Error) {
         message = err.message;
+      } else if (typeof err === 'string') {
+        message = err;
       }
-
-      set({
-        loading: false,
-        error: message,
-      });
-
-      console.error("[dashboardStore] fetchDashboardStats failed:", err);
+      set({ error: message, loading: false });
+      // eslint-disable-next-line no-console
+      console.error('[dashboardStore] fetchDashboardStats failed:', err);
     }
   },
 
