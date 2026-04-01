@@ -1,74 +1,68 @@
 import "./globals.css";
 
-import PrivateLayout, { Role } from "@/components/layout/private-layout";
-import PublicLayout from "@/components/layout/public-layout";
-import UserProvider from "@/hooks/session-context";
-import { auth } from "@/lib/auth";
-import { cookies, headers } from "next/headers";
-import AuthPage from "./auth/page";
-import { ReactQueryProvider } from "@/components/provider/react-query-provider";
+import { Geist } from "next/font/google";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Toaster } from "sonner";
 import { ToastContainer } from "react-toastify";
-import { redirect } from "next/navigation";
-import { Geist } from "next/font/google";
+
+import { auth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import UserProvider from "@/hooks/session-context";
+import { ReactQueryProvider } from "@/components/provider/react-query-provider";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import PrivateLayout, { Role } from "@/components/layout/private-layout";
+import PublicLayout from "@/components/layout/public-layout";
 
+// Load Google Font
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-
+  // 1. Fetch Request Headers & Session
   const headersList = await headers();
+  const session = await auth.api.getSession({ headers: headersList });
+  
+  // Custom middleware header to get current route path
   const pathname = headersList.get("x-pathname") || "";
-  const publicPaths = [
-    "/privacy",
-    "/",
-    "/",
-    "/cart",
-    "/auth",
-    "/auth/new",
-    "/products",
-    "/products/*",
-  ];
+  const user = session?.user;
 
-  const isPublic = publicPaths.includes(pathname);
-  console.log("Resolved pathname:", pathname);
-
-  const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
-  // if (session && publicPaths.includes(pathname)) {
-  //   redirect("/");
-  // }
-
-  if (session && session?.user?.accountType === "ADMIN" && pathname === "/") {
+  // 2. Auth Redirects
+  // If an Admin/Manager hits the root homepage, push them to the dashboard
+  if (user && user.accountType !== "CLIENT" && pathname === "/") {
     redirect("/admin/dashboard");
   }
+
+  // 3. Layout Selection Logic
+  // Any logged-in staff member gets the Private Layout.
+  // Everyone else (Clients, Guests, Logged-out users) gets the Public Layout.
+  const isStaffMember = user && user.accountType !== "CLIENT";
+
   return (
-    <html className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={cn("font-sans antialiased", geist.variable)}>
       <body>
         <ReactQueryProvider>
           <UserProvider session={session}>
-            {session && session?.user?.accountType !== "CLIENT" ? (
-              <PrivateLayout roles={[session?.user?.accountType as Role]}>
+            
+            {/* Conditional Layout Injection */}
+            {isStaffMember ? (
+              <PrivateLayout roles={[user.accountType as Role]}>
                 {children}
               </PrivateLayout>
-            ) : session && session?.user?.accountType === "CLIENT" ? (
-              <PublicLayout>{children}</PublicLayout>
-            ) : isPublic ? (
-              <PublicLayout>{children}</PublicLayout>
             ) : (
-              <PublicLayout>{children}</PublicLayout>
-
-              // <AuthPage />
+              <PublicLayout>
+                {children}
+              </PublicLayout>
             )}
+
           </UserProvider>
         </ReactQueryProvider>
-        <Toaster />
+
+        {/* Global Toast Notifications */}
+        <Toaster richColors position="top-right" />
         <ToastContainer />
       </body>
     </html>

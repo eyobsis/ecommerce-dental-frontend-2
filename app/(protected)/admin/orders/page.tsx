@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import {
   Sheet,
@@ -314,139 +313,141 @@ const OrdersPage = () => {
                 ))}
               </div>
             ) : (
-              <Table>
-                <TableHeader className="bg-slate-50/50">
-                  <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                    <TableHead className="w-28 font-semibold text-slate-600 pl-6">
-                      Order ID
-                    </TableHead>
-                    <TableHead className="font-semibold text-slate-600">
-                      Customer
-                    </TableHead>
-                    <TableHead className="w-40 font-semibold text-slate-600">
-                      Date
-                    </TableHead>
-                    <TableHead className="w-32 text-right font-semibold text-slate-600">
-                      Total
-                    </TableHead>
-                    <TableHead className="w-40 font-semibold text-slate-600">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-44 font-semibold text-slate-600">
-                      Action
-                    </TableHead>
-                    <TableHead className="w-20 text-center font-semibold text-slate-600 pr-6">
-                      View
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
+              <div className="overflow-x-auto">
+                  <Table className="min-w-[980px]">
+                    <TableHeader className="bg-slate-50/50">
+                      <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                        <TableHead className="w-28 font-semibold text-slate-600 pl-6">
+                          Order ID
+                        </TableHead>
+                        <TableHead className="font-semibold text-slate-600">
+                          Customer
+                        </TableHead>
+                        <TableHead className="w-40 font-semibold text-slate-600">
+                          Date
+                        </TableHead>
+                        <TableHead className="w-32 text-right font-semibold text-slate-600">
+                          Total
+                        </TableHead>
+                        <TableHead className="w-40 font-semibold text-slate-600">
+                          Status
+                        </TableHead>
+                        <TableHead className="w-44 font-semibold text-slate-600">
+                          Action
+                        </TableHead>
+                        <TableHead className="w-20 text-center font-semibold text-slate-600 pr-6">
+                          View
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                <TableBody>
-                  {paginatedOrders.length === 0 ? (
-                    <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={7} className="h-64 text-center">
-                        <div className="flex flex-col items-center justify-center text-slate-500">
-                          <Inbox className="h-12 w-12 text-slate-300 mb-4" />
-                          <p className="text-lg font-medium text-slate-900">
-                            No orders found
-                          </p>
-                          <p className="text-sm mt-1">
-                            {search
-                              ? "Try adjusting your search terms."
-                              : "You don't have any orders yet."}
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    paginatedOrders.map((order) => {
-                      const st = statusInfo(order.status);
-
-                      return (
-                        <TableRow
-                          key={order.id}
-                          className="hover:bg-slate-50/80 border-b border-slate-50 transition-colors group"
-                        >
-                          <TableCell className="font-medium text-slate-900 pl-6">
-                            #{order.id.slice(0, 8)}
-                          </TableCell>
-
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium text-slate-900 truncate max-w-[200px]">
-                                {order.name}
-                              </span>
-                              <span className="text-sm text-slate-500 truncate max-w-[200px]">
-                                {order.email}
-                              </span>
+                    <TableBody>
+                      {paginatedOrders.length === 0 ? (
+                        <TableRow className="hover:bg-transparent">
+                          <TableCell colSpan={7} className="h-64 text-center">
+                            <div className="flex flex-col items-center justify-center text-slate-500">
+                              <Inbox className="h-12 w-12 text-slate-300 mb-4" />
+                              <p className="text-lg font-medium text-slate-900">
+                                No orders found
+                              </p>
+                              <p className="text-sm mt-1">
+                                {search
+                                  ? "Try adjusting your search terms."
+                                  : "You don't have any orders yet."}
+                              </p>
                             </div>
                           </TableCell>
-
-                          <TableCell className="text-slate-600 text-sm">
-                            {formatDate(order.createdAt).split(",")[0]}
-                          </TableCell>
-
-                          <TableCell className="text-right font-semibold text-slate-900">
-                            {order.cost.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })} ETB
-                          </TableCell>
-
-                          <TableCell>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ring-inset ${st.bg} ${st.text} ${st.ring}`}
-                            >
-                              {st.label}
-                            </span>
-                          </TableCell>
-
-                          <TableCell>
-                            <Select
-                              value={order.status}
-                              onValueChange={(v) => {
-                                handleStatusChange(
-                                  order.id,
-                                  v as Order["status"],
-                                );
-                              }}
-                            >
-                              <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200 hover:bg-slate-50 transition-colors rounded-lg text-sm">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-xl shadow-lg ring-1 ring-slate-900/5">
-                                <SelectItem value="pending_verification">Verifying</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="paid">Paid</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="completed">Completed</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-
-                          <TableCell className="text-center pr-6">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                              onClick={() => setSelectedOrder(order)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
                         </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
+                      ) : (
+                        paginatedOrders.map((order) => {
+                          const st = statusInfo(order.status);
+
+                          return (
+                            <TableRow
+                              key={order.id}
+                              className="hover:bg-slate-50/80 border-b border-slate-50 transition-colors group"
+                            >
+                              <TableCell className="font-medium text-slate-900 pl-6">
+                                #{order.id.slice(0, 8)}
+                              </TableCell>
+
+                              <TableCell>
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-slate-900 truncate max-w-[200px]">
+                                    {order.name}
+                                  </span>
+                                  <span className="text-sm text-slate-500 truncate max-w-[200px]">
+                                    {order.email}
+                                  </span>
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="text-slate-600 text-sm">
+                                {formatDate(order.createdAt).split(",")[0]}
+                              </TableCell>
+
+                              <TableCell className="text-right font-semibold text-slate-900">
+                                {order.cost.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })} ETB
+                              </TableCell>
+
+                              <TableCell>
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ring-inset ${st.bg} ${st.text} ${st.ring}`}
+                                >
+                                  {st.label}
+                                </span>
+                              </TableCell>
+
+                              <TableCell>
+                                <Select
+                                  value={order.status}
+                                  onValueChange={(v) => {
+                                    handleStatusChange(
+                                      order.id,
+                                      v as Order["status"],
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200 hover:bg-slate-50 transition-colors rounded-lg text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-xl shadow-lg ring-1 ring-slate-900/5">
+                                    <SelectItem value="pending_verification">Verifying</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="paid">Paid</SelectItem>
+                                    <SelectItem value="shipped">Shipped</SelectItem>
+                                    <SelectItem value="completed">Completed</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </TableCell>
+
+                              <TableCell className="text-center pr-6">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                  onClick={() => setSelectedOrder(order)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
             )}
           </CardContent>
 
           {/* Pagination */}
           {!isLoading && filteredOrders.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
               <p className="text-sm text-slate-500">
                 Showing <span className="font-medium text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)}</span> of{" "}
                 <span className="font-medium text-slate-900">{filteredOrders.length}</span> results

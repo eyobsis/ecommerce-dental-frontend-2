@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { PanelLeftIcon } from "lucide-react"
+import { MenuIcon, PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -275,6 +275,58 @@ function SidebarTrigger({
     >
       <PanelLeftIcon />
       <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  )
+}
+
+function SidebarDesktopTrigger({
+  className,
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { setOpen } = useSidebar()
+
+  return (
+    <Button
+      data-sidebar="desktop-trigger"
+      data-slot="sidebar-desktop-trigger"
+      variant="ghost"
+      size="icon"
+      className={cn("hidden size-7 md:inline-flex", className)}
+      onClick={(event) => {
+        onClick?.(event)
+        setOpen((open) => !open)
+      }}
+      {...props}
+    >
+      <PanelLeftIcon />
+      <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  )
+}
+
+function SidebarMobileTrigger({
+  className,
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { setOpenMobile } = useSidebar()
+
+  return (
+    <Button
+      data-sidebar="mobile-trigger"
+      data-slot="sidebar-mobile-trigger"
+      variant="ghost"
+      size="icon"
+      className={cn("size-8 md:hidden", className)}
+      onClick={(event) => {
+        onClick?.(event)
+        setOpenMobile((open) => !open)
+      }}
+      {...props}
+    >
+      <MenuIcon />
+      <span className="sr-only">Open Menu</span>
     </Button>
   )
 }
@@ -606,10 +658,7 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+  const width = "70%"
 
   return (
     <div
@@ -718,9 +767,11 @@ export {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMobileTrigger,
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
+  SidebarDesktopTrigger,
   SidebarTrigger,
   useSidebar,
 }

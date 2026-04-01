@@ -1,8 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
-import { GalleryVerticalEnd, Minus, Plus } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { GalleryVerticalEnd, ChevronRight } from "lucide-react";
 
 import {
   Collapsible,
@@ -18,114 +19,142 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-  import { Menu } from "lucide-react";
-  import { useIsMobile } from "@/hooks/use-mobile";
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
+  SidebarRail,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
-  export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
-    const pathname = usePathname();
-    const filteredAccessSideBar = getNavForPosition("ADMIN");
-    const isMobile = useIsMobile();
-    const sidebarContent = (
-      <>
-        <SidebarHeader className="bg-gradient-to-r from-indigo-700 to-indigo-500">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <a href="#">
-                  <div className="bg-cyan-600 text-white flex aspect-square size-8 items-center justify-center rounded-xl shadow-lg">
-                    <GalleryVerticalEnd className="size-4" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none font-poppins font-bold">
+import { cn } from "@/lib/utils";
+import { getNavForPosition } from "@/app/utils/auth.util";
+
+export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+  // We use Shadcn's built-in state to know if it's collapsed, rather than localStorage
+  const { state } = useSidebar(); 
+  
+  // Assuming this returns an object with a `navMain` array
+  const filteredAccessSideBar = getNavForPosition("ADMIN");
+
+  return (
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-indigo-100 shadow-md font-poppins"
+      {...props}
+    >
+      {/* HEADER */}
+      <SidebarHeader className="bg-gradient-to-r from-indigo-700 to-indigo-600 p-4">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              size="lg" 
+              asChild 
+              className="hover:bg-indigo-800/50 text-white"
+            >
+              <Link href="/admin/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-sm">
+                  <GalleryVerticalEnd className="size-4" />
+                </div>
+                {state === "expanded" && (
+                  <div className="flex flex-col gap-0.5 leading-none font-bold">
                     <span>Admin Control</span>
                   </div>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent className="bg-white text-gray-900">
-          <SidebarGroup>
-            <SidebarMenu>
-              {filteredAccessSideBar.navMain.map((item, index) => (
-                <Collapsible
-                  key={item.title}
-                  defaultOpen={index === 1}
-                  className="group/collapsible text-gray-900"
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton className="hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-300 font-poppins font-semibold">
-                        {item.title}{" "}
-                        <Plus className="ml-auto group-data-[state=open]/collapsible:hidden text-indigo-500" />
-                        <Minus className="ml-auto group-data-[state=closed]/collapsible:hidden text-indigo-500" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    {item.items?.length ? (
+                )}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      {/* CONTENT */}
+      <SidebarContent className="bg-white text-gray-900">
+        <SidebarGroup>
+          <SidebarMenu>
+            {filteredAccessSideBar.navMain.map((item: any, index: number) => {
+              const hasSubItems = item.items && item.items.length > 0;
+
+              // IF IT HAS SUB-MENUS (COLLAPSIBLE)
+              if (hasSubItems) {
+                return (
+                  <Collapsible
+                    key={item.title}
+                    asChild
+                    defaultOpen={index === 0}
+                    className="group/collapsible"
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        {/* The 'tooltip' prop automatically handles collapsed hover states! */}
+                        <SidebarMenuButton 
+                          tooltip={item.title}
+                          className="hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition-colors duration-200"
+                        >
+                          {item.icon}
+                          <span>{item.title}</span>
+                          <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90 text-indigo-400" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      
                       <CollapsibleContent>
-                        <SidebarMenuSub className="text-gray-900 font-semibold">
+                        <SidebarMenuSub>
                           {item.items.map((subItem: any) => {
                             const isActive = pathname === subItem.url;
                             return (
-                              <SidebarMenuSubItem
-                                key={subItem.url}
-                                className={`text-gray-900 ${
-                                  isActive ? "bg-indigo-50 text-indigo-600" : ""
-                                }`}
-                              >
+                              <SidebarMenuSubItem key={subItem.url}>
                                 <SidebarMenuSubButton
                                   asChild
-                                  className={`transition-colors duration-300 font-semibold ${
-                                    isActive
-                                      ? "text-indigo-600"
-                                      : "hover:text-indigo-500"
-                                  }`}
+                                  isActive={isActive}
+                                  className={cn(
+                                    "font-medium transition-colors duration-200",
+                                    isActive 
+                                      ? "bg-indigo-50 text-indigo-600" 
+                                      : "text-gray-600 hover:text-indigo-500 hover:bg-indigo-50/50"
+                                  )}
                                 >
-                                  <a href={subItem.url}>
+                                  <Link href={subItem.url}>
                                     {subItem.icon}
-                                    {subItem.title}
-                                  </a>
+                                    <span>{subItem.title}</span>
+                                  </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             );
                           })}
                         </SidebarMenuSub>
                       </CollapsibleContent>
-                    ) : null}
-                  </SidebarMenuItem>
-                </Collapsible>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-        </SidebarContent>
-      </>
-    );
-    if (isMobile) {
-      return (
-        <Sheet>
-          <SheetTrigger asChild>
-            <button className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-md border border-slate-200 text-indigo-600 hover:bg-indigo-50 focus:outline-none">
-              <Menu className="h-6 w-6" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64 max-w-full">
-            {sidebarContent}
-          </SheetContent>
-        </Sheet>
-      );
-    }
-    return (
-      <Sidebar {...props} className="bg-white border-r border-indigo-100 font-inter shadow-md">
-        {sidebarContent}
-      </Sidebar>
-    );
-  }
-              </Collapsible>
-            ))}
+                    </SidebarMenuItem>
+                  </Collapsible>
+                );
+              }
+
+              // IF IT DOES NOT HAVE SUB-MENUS (STANDARD LINK)
+              const isActive = pathname === item.url;
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={isActive}
+                    className={cn(
+                      "font-semibold transition-colors duration-200",
+                      isActive
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "hover:bg-indigo-50 hover:text-indigo-600"
+                    )}
+                  >
+                    <Link href={item.url}>
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail className="bg-gray-100/50" />
+
+      {/* RAILS allow users to drag/resize or click to expand */}
+      <SidebarRail />
     </Sidebar>
   );
 }
