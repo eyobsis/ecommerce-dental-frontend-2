@@ -155,6 +155,16 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+
+  const statuses = [
+    "pending_verification",
+    "pending",
+    "paid",
+    "shipped",
+    "completed",
+    "cancelled",
+  ];
 
   const fuse = useMemo(() => {
     return new Fuse(orders, {
@@ -217,10 +227,23 @@ const OrdersPage = () => {
 
   const filteredOrders = useMemo(() => {
     const term = search.trim();
-    if (!term) return orders;
-    const results = fuse.search(term);
-    return results.map((r) => r.item);
-  }, [fuse, search, orders]);
+
+    // First filter by search term
+    let results: Order[];
+    if (!term) {
+      results = orders;
+    } else {
+      const fuseResults = fuse.search(term);
+      results = fuseResults.map((r) => r.item);
+    }
+
+    // Then filter by status
+    if (statusFilter) {
+      results = results.filter((order) => order.status === statusFilter);
+    }
+
+    return results;
+  }, [fuse, search, orders, statusFilter]);
 
   const paginatedOrders = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -294,6 +317,21 @@ const OrdersPage = () => {
               }}
             />
           </div>
+          <select
+            className="h-11 px-3 bg-white border-slate-200 shadow-sm rounded-xl focus-visible:ring-indigo-500"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All statuses</option>
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
         </div>
 
         {error && <ErrorBanner message={error} className="mb-8 rounded-xl" />}
@@ -305,7 +343,10 @@ const OrdersPage = () => {
               // Premium Skeleton
               <div className="p-6 space-y-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 animate-pulse">
+                  <div
+                    key={i}
+                    className="flex items-center gap-4 animate-pulse"
+                  >
                     <div className="h-4 w-24 bg-slate-100 rounded" />
                     <div className="h-10 flex-1 bg-slate-50 rounded-lg" />
                     <div className="h-8 w-24 bg-slate-100 rounded-full" />
@@ -314,134 +355,145 @@ const OrdersPage = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                  <Table className="min-w-[980px]">
-                    <TableHeader className="bg-slate-50/50">
-                      <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                        <TableHead className="w-28 font-semibold text-slate-600 pl-6">
-                          Order ID
-                        </TableHead>
-                        <TableHead className="font-semibold text-slate-600">
-                          Customer
-                        </TableHead>
-                        <TableHead className="w-40 font-semibold text-slate-600">
-                          Date
-                        </TableHead>
-                        <TableHead className="w-32 text-right font-semibold text-slate-600">
-                          Total
-                        </TableHead>
-                        <TableHead className="w-40 font-semibold text-slate-600">
-                          Status
-                        </TableHead>
-                        <TableHead className="w-44 font-semibold text-slate-600">
-                          Action
-                        </TableHead>
-                        <TableHead className="w-20 text-center font-semibold text-slate-600 pr-6">
-                          View
-                        </TableHead>
+                <Table className="min-w-[980px]">
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                      <TableHead className="w-28 font-semibold text-slate-600 pl-6">
+                        Order ID
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-600">
+                        Customer
+                      </TableHead>
+                      <TableHead className="w-40 font-semibold text-slate-600">
+                        Date
+                      </TableHead>
+                      <TableHead className="w-32 text-right font-semibold text-slate-600">
+                        Total
+                      </TableHead>
+                      <TableHead className="w-40 font-semibold text-slate-600">
+                        Status
+                      </TableHead>
+                      <TableHead className="w-44 font-semibold text-slate-600">
+                        Action
+                      </TableHead>
+                      <TableHead className="w-20 text-center font-semibold text-slate-600 pr-6">
+                        View
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {paginatedOrders.length === 0 ? (
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={7} className="h-64 text-center">
+                          <div className="flex flex-col items-center justify-center text-slate-500">
+                            <Inbox className="h-12 w-12 text-slate-300 mb-4" />
+                            <p className="text-lg font-medium text-slate-900">
+                              No orders found
+                            </p>
+                            <p className="text-sm mt-1">
+                              {search
+                                ? "Try adjusting your search terms."
+                                : "You don't have any orders yet."}
+                            </p>
+                          </div>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
+                    ) : (
+                      paginatedOrders.map((order) => {
+                        const st = statusInfo(order.status);
 
-                    <TableBody>
-                      {paginatedOrders.length === 0 ? (
-                        <TableRow className="hover:bg-transparent">
-                          <TableCell colSpan={7} className="h-64 text-center">
-                            <div className="flex flex-col items-center justify-center text-slate-500">
-                              <Inbox className="h-12 w-12 text-slate-300 mb-4" />
-                              <p className="text-lg font-medium text-slate-900">
-                                No orders found
-                              </p>
-                              <p className="text-sm mt-1">
-                                {search
-                                  ? "Try adjusting your search terms."
-                                  : "You don't have any orders yet."}
-                              </p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        paginatedOrders.map((order) => {
-                          const st = statusInfo(order.status);
+                        return (
+                          <TableRow
+                            key={order.id}
+                            className="hover:bg-slate-50/80 border-b border-slate-50 transition-colors group"
+                          >
+                            <TableCell className="font-medium text-slate-900 pl-6">
+                              #{order.id.slice(0, 8)}
+                            </TableCell>
 
-                          return (
-                            <TableRow
-                              key={order.id}
-                              className="hover:bg-slate-50/80 border-b border-slate-50 transition-colors group"
-                            >
-                              <TableCell className="font-medium text-slate-900 pl-6">
-                                #{order.id.slice(0, 8)}
-                              </TableCell>
-
-                              <TableCell>
-                                <div className="flex flex-col">
-                                  <span className="font-medium text-slate-900 truncate max-w-[200px]">
-                                    {order.name}
-                                  </span>
-                                  <span className="text-sm text-slate-500 truncate max-w-[200px]">
-                                    {order.email}
-                                  </span>
-                                </div>
-                              </TableCell>
-
-                              <TableCell className="text-slate-600 text-sm">
-                                {formatDate(order.createdAt).split(",")[0]}
-                              </TableCell>
-
-                              <TableCell className="text-right font-semibold text-slate-900">
-                                {order.cost.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })} ETB
-                              </TableCell>
-
-                              <TableCell>
-                                <span
-                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ring-inset ${st.bg} ${st.text} ${st.ring}`}
-                                >
-                                  {st.label}
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="font-medium text-slate-900 truncate max-w-[200px]">
+                                  {order.name}
                                 </span>
-                              </TableCell>
+                                <span className="text-sm text-slate-500 truncate max-w-[200px]">
+                                  {order.email}
+                                </span>
+                              </div>
+                            </TableCell>
 
-                              <TableCell>
-                                <Select
-                                  value={order.status}
-                                  onValueChange={(v) => {
-                                    handleStatusChange(
-                                      order.id,
-                                      v as Order["status"],
-                                    );
-                                  }}
-                                >
-                                  <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200 hover:bg-slate-50 transition-colors rounded-lg text-sm">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent className="rounded-xl shadow-lg ring-1 ring-slate-900/5">
-                                    <SelectItem value="pending_verification">Verifying</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="paid">Paid</SelectItem>
-                                    <SelectItem value="shipped">Shipped</SelectItem>
-                                    <SelectItem value="completed">Completed</SelectItem>
-                                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
+                            <TableCell className="text-slate-600 text-sm">
+                              {formatDate(order.createdAt).split(",")[0]}
+                            </TableCell>
 
-                              <TableCell className="text-center pr-6">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                  onClick={() => setSelectedOrder(order)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                            <TableCell className="text-right font-semibold text-slate-900">
+                              {order.cost.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}{" "}
+                              ETB
+                            </TableCell>
+
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ring-inset ${st.bg} ${st.text} ${st.ring}`}
+                              >
+                                {st.label}
+                              </span>
+                            </TableCell>
+
+                            <TableCell>
+                              <Select
+                                value={order.status}
+                                onValueChange={(v) => {
+                                  handleStatusChange(
+                                    order.id,
+                                    v as Order["status"],
+                                  );
+                                }}
+                              >
+                                <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200 hover:bg-slate-50 transition-colors rounded-lg text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl shadow-lg ring-1 ring-slate-900/5">
+                                  <SelectItem value="pending_verification">
+                                    Verifying
+                                  </SelectItem>
+                                  <SelectItem value="pending">
+                                    Pending
+                                  </SelectItem>
+                                  <SelectItem value="paid">Paid</SelectItem>
+                                  <SelectItem value="shipped">
+                                    Shipped
+                                  </SelectItem>
+                                  <SelectItem value="completed">
+                                    Completed
+                                  </SelectItem>
+                                  <SelectItem value="cancelled">
+                                    Cancelled
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+
+                            <TableCell className="text-center pr-6">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                onClick={() => setSelectedOrder(order)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
 
@@ -449,8 +501,22 @@ const OrdersPage = () => {
           {!isLoading && filteredOrders.length > 0 && (
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
               <p className="text-sm text-slate-500">
-                Showing <span className="font-medium text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)}</span> of{" "}
-                <span className="font-medium text-slate-900">{filteredOrders.length}</span> results
+                Showing{" "}
+                <span className="font-medium text-slate-900">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-medium text-slate-900">
+                  {Math.min(
+                    currentPage * ITEMS_PER_PAGE,
+                    filteredOrders.length,
+                  )}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-slate-900">
+                  {filteredOrders.length}
+                </span>{" "}
+                results
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -553,11 +619,15 @@ const OrdersPage = () => {
                               {item.productName}
                             </p>
                             <p className="text-slate-500 text-sm mt-0.5">
-                              {item.quantity} × {item.productCost.toLocaleString()} ETB
+                              {item.quantity} ×{" "}
+                              {item.productCost.toLocaleString()} ETB
                             </p>
                           </div>
                           <p className="font-semibold text-slate-900 text-sm shrink-0">
-                            {(item.productCost * item.quantity).toLocaleString()} ETB
+                            {(
+                              item.productCost * item.quantity
+                            ).toLocaleString()}{" "}
+                            ETB
                           </p>
                         </div>
                       ))}
@@ -565,9 +635,14 @@ const OrdersPage = () => {
                       <Separator className="my-2" />
 
                       <div className="flex justify-between items-center pt-2">
-                        <span className="text-slate-500 font-medium text-sm">Total Amount</span>
+                        <span className="text-slate-500 font-medium text-sm">
+                          Total Amount
+                        </span>
                         <span className="text-xl font-bold text-slate-900 tracking-tight">
-                          {selectedOrder.cost.toLocaleString(undefined, { minimumFractionDigits: 2 })} ETB
+                          {selectedOrder.cost.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}{" "}
+                          ETB
                         </span>
                       </div>
                     </CardContent>
@@ -617,9 +692,12 @@ const OrdersPage = () => {
                           <div className="h-10 w-10 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-3">
                             <FileText className="h-5 w-5 text-slate-400" />
                           </div>
-                          <h4 className="text-sm font-semibold text-slate-900">Attachment Available</h4>
+                          <h4 className="text-sm font-semibold text-slate-900">
+                            Attachment Available
+                          </h4>
                           <p className="mt-1 text-xs text-slate-500 mb-4 max-w-[200px]">
-                            The payment proof is a document or could not be previewed inline.
+                            The payment proof is a document or could not be
+                            previewed inline.
                           </p>
                           <Button
                             variant="outline"
@@ -660,14 +738,27 @@ const OrdersPage = () => {
                 height={900}
                 className="w-full h-full object-contain max-h-[85vh]"
               />
-              <button 
+              <button
                 className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 backdrop-blur-md transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   setPreviewImage(null);
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
           </div>
