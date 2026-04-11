@@ -105,9 +105,15 @@ export default function DashboardPage() {
             <Skeleton key={i} className="h-32 w-full rounded-xl" />
           ))}
         </div>
+        <div className="grid grid-cols-1 gap-4">
+          <Skeleton className="h-[400px] rounded-xl" />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
-          <Skeleton className="h-[400px] lg:col-span-4 rounded-xl" />
-          <Skeleton className="h-[400px] lg:col-span-3 rounded-xl" />
+          <Skeleton className="h-[320px] lg:col-span-4 rounded-xl" />
+          <Skeleton className="h-[320px] lg:col-span-3 rounded-xl" />
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          <Skeleton className="h-[320px] rounded-xl" />
         </div>
       </div>
     );
@@ -174,12 +180,14 @@ export default function DashboardPage() {
   }));
 
   const chartColors = [
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))",
-    "hsl(var(--primary))",
+    "#3b82f6",
+    "#f97316",
+    "#10b981",
+    "#f43f5e",
+    "#8b5cf6",
+    "#eab308",
+    "#14b8a6",
+    "#ec4899",
   ];
 
   return (
@@ -250,11 +258,11 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* CHARTS & STATUS (7-Column Split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
+      {/* REVENUE TREND */}
+      <div className="grid grid-cols-1 gap-4">
         
         {/* Main Chart */}
-        <Card className="lg:col-span-4 shadow-sm border-slate-200">
+        <Card className="shadow-sm border-slate-200">
           <CardHeader>
             <CardTitle>Revenue Trend</CardTitle>
             <CardDescription>Monthly revenue plus running average based on your real orders</CardDescription>
@@ -295,9 +303,13 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
+      </div>
+
+      {/* ORDER STATUS + DISTRIBUTION (ONE ROW) */}
+      <div className="grid grid-cols-1 xl:grid-cols-7 gap-4">
 
         {/* Order Status Grid */}
-        <Card className="lg:col-span-3 shadow-sm border-slate-200">
+        <Card className="xl:col-span-4 shadow-sm border-slate-200">
           <CardHeader>
             <CardTitle>Order Status Pipeline</CardTitle>
             <CardDescription>Distribution of active and completed orders</CardDescription>
@@ -326,9 +338,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-7 gap-4">
         <Card className="xl:col-span-3 shadow-sm border-slate-200">
           <CardHeader>
             <CardTitle>Status Distribution</CardTitle>
@@ -376,7 +385,10 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="xl:col-span-4 shadow-sm border-slate-200">
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <Card className="shadow-sm border-slate-200">
           <CardHeader>
             <CardTitle>Top Product Performance</CardTitle>
             <CardDescription>Revenue and sold quantity for top performing products</CardDescription>

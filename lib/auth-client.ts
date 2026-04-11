@@ -1,6 +1,10 @@
 import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 
+const authBaseURL =
+  process.env.NEXT_PUBLIC_AUTH_BASE_URL ??
+  (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+
 export const {
   signIn,
   signUp,
@@ -11,7 +15,7 @@ export const {
   requestPasswordReset,
   resetPassword,
 } = createAuthClient({
-  baseURL: "http://localhost:3000",
+  baseURL: authBaseURL,
 
   plugins: [
     inferAdditionalFields({
