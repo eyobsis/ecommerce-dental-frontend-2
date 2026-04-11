@@ -3,7 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GalleryVerticalEnd, ChevronRight } from "lucide-react";
+import {
+  GalleryVerticalEnd,
+  ChevronRight,
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  Tags,
+  Users,
+  Settings,
+} from "lucide-react";
 
 import {
   Collapsible,
@@ -26,15 +35,59 @@ import {
 } from "@/components/ui/sidebar";
 
 import { cn } from "@/lib/utils";
-import { getNavForPosition } from "@/app/utils/auth.util";
+
+type SidebarSubItem = {
+  title: string;
+  url: string;
+  icon?: React.ReactNode;
+};
+
+type SidebarMainItem = {
+  title: string;
+  url: string;
+  icon: React.ReactNode;
+  items?: SidebarSubItem[];
+};
+
+const filteredAccessSideBar: { navMain: SidebarMainItem[] } = {
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/admin/dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
+      title: "Orders",
+      url: "/admin/orders",
+      icon: <ShoppingCart className="h-4 w-4" />,
+    },
+    {
+      title: "Products",
+      url: "/admin/products",
+      icon: <Package className="h-4 w-4" />,
+    },
+    {
+      title: "Categories",
+      url: "/admin/categories",
+      icon: <Tags className="h-4 w-4" />,
+    },
+    {
+      title: "Customers",
+      url: "/admin/users",
+      icon: <Users className="h-4 w-4" />,
+    },
+    {
+      title: "Settings",
+      url: "/admin/profile",
+      icon: <Settings className="h-4 w-4" />,
+    },
+  ],
+};
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   // We use Shadcn's built-in state to know if it's collapsed, rather than localStorage
   const { state } = useSidebar(); 
-  
-  // Assuming this returns an object with a `navMain` array
-  const filteredAccessSideBar = getNavForPosition("ADMIN");
 
   return (
     <Sidebar
@@ -70,8 +123,8 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       <SidebarContent className="bg-white text-gray-900">
         <SidebarGroup>
           <SidebarMenu>
-            {filteredAccessSideBar.navMain.map((item: any, index: number) => {
-              const hasSubItems = item.items && item.items.length > 0;
+            {filteredAccessSideBar.navMain.map((item, index: number) => {
+              const hasSubItems = Boolean(item.items?.length);
 
               // IF IT HAS SUB-MENUS (COLLAPSIBLE)
               if (hasSubItems) {
@@ -97,7 +150,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                       
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {item.items.map((subItem: any) => {
+                          {item.items?.map((subItem) => {
                             const isActive = pathname === subItem.url;
                             return (
                               <SidebarMenuSubItem key={subItem.url}>
