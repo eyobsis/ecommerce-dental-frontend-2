@@ -17,8 +17,6 @@ import {
   Tags,
   GalleryVerticalEnd,
   ChevronRight,
-  Bell,
-  Search,
 } from "lucide-react";
 
 // Shadcn UI Components
