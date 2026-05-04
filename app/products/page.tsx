@@ -701,15 +701,15 @@ export default function ProductsPage() {
                     >
                       {/* Product Image */}
                       <div className="relative overflow-hidden rounded-lg">
-                        <Image
-                          src={product.image || "/placeholder-product.jpg"}
-                          alt={product.name}
-                          width={480}
-                          height={192}
-                          unoptimized
-                          sizes="(max-width: 499px) 100vw, (max-width: 1279px) 50vw, 25vw"
-                          className="h-36 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-40"
-                        />
+                        <div className="relative w-full aspect-[4/3] bg-slate-100">
+                          <Image
+                            src={product.image || "/placeholder-product.jpg"}
+                            alt={product.name}
+                            fill
+                            unoptimized
+                            className="object-cover object-center transition duration-500 group-hover:scale-105"
+                          />
+                        </div>
 
                         {/* Category Badge */}
                         <span className="absolute left-2 top-2 max-w-[72%] truncate rounded-full border border-white/60 bg-slate-900/88 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-white shadow">
