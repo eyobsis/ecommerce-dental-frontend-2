@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import HeroSection from "@/components/ecommerce/hero-section";
 import ProductSliderSection from "@/components/ecommerce/product-slider";
 import { ecommerceApi } from "@/lib/ecommerce-api";
@@ -133,6 +135,25 @@ const HomePage = () => {
     })
     .slice(0, 8);
 
+  const recommendedProducts = (() => {
+    const seen = new Set<string>();
+    const picks: SliderProduct[] = [];
+    const addProducts = (list: SliderProduct[]) => {
+      for (const item of list) {
+        if (seen.has(item.id)) continue;
+        picks.push(item);
+        seen.add(item.id);
+        if (picks.length >= 6) return;
+      }
+    };
+
+    addProducts(bestSelling);
+    addProducts(featuredProducts);
+    addProducts(newProducts);
+
+    return picks;
+  })();
+
   const brandBuckets = new Map<string, SliderProduct>();
   for (const p of sliderProducts) {
     const key = p.brand || "Other";
@@ -164,6 +185,75 @@ const HomePage = () => {
               performance, and professional workflow efficiency.
             </p>
           </section>
+
+          {recommendedProducts.length > 0 && (
+            <section className="rounded-[26px] border border-slate-200/70 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-5 text-white shadow-[0_24px_70px_rgba(15,23,42,0.2)] sm:p-8">
+              <div className="grid gap-6 lg:grid-cols-[1.05fr_1.95fr] lg:items-center">
+                <div className="space-y-4">
+                  <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">
+                    Recommended Picks
+                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                    Dental essentials tailored for daily workflows
+                  </h2>
+                  <p className="text-sm leading-6 text-white/75 sm:text-[15px]">
+                    A hand-selected mix of best sellers, featured innovations,
+                    and newly added equipment so teams can shop with confidence.
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-xs text-white/70">
+                    {["Sterilization", "Diagnostics", "Consumables", "Chairside"].map(
+                      (tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full border border-white/20 px-3 py-1"
+                        >
+                          {tag}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                  <Link
+                    href="/products"
+                    className="inline-flex w-fit items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-white/20"
+                  >
+                    Browse all products
+                  </Link>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {recommendedProducts.map((product) => (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.id}`}
+                      className="group rounded-2xl border border-white/10 bg-white/5 p-3 transition hover:-translate-y-1 hover:border-white/30 hover:bg-white/10"
+                    >
+                      <div className="relative w-full aspect-[4/3] overflow-hidden rounded-xl bg-white/10">
+                        <Image
+                          src={product.image || "/placeholder-product.jpg"}
+                          alt={product.name}
+                          fill
+                          unoptimized
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-contain object-center transition duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="mt-3 space-y-1">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
+                          {product.categoryName || "Dental Supplies"}
+                        </p>
+                        <h3 className="line-clamp-2 text-sm font-semibold text-white">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm font-semibold text-amber-200">
+                          {product.price.toLocaleString()} ETB
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
           {bestSelling.length > 0 && (
             <ProductSliderSection
