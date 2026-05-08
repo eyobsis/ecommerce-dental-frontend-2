@@ -47,7 +47,7 @@ const socialProviders = [
   { name: "Google", icon: Chrome, key: "google" },
   { name: "Facebook", icon: Facebook, key: "facebook" },
   { name: "Twitter", icon: Twitter, key: "twitter" },
-  { name: "LinkedIn", icon: Linkedin, key: "linkedin" },
+  { name: "LinkedIn", icon: Linkedin, key: "linkedin" }, 
 ];
 
 export default function CreateAccount({

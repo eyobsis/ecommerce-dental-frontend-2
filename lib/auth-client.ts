@@ -11,7 +11,7 @@ export const {
   requestPasswordReset,
   resetPassword,
 } = createAuthClient({
-  baseURL: "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 
   plugins: [
     inferAdditionalFields({

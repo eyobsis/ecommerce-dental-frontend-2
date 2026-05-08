@@ -22,11 +22,9 @@ import { changePassword, useSession } from "@/lib/auth-client";
 const ChangePassword = () => {
   const { data: session, isPending } = useSession();
   const user = session?.user;
-  console.log("getting user data ", user);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [revokeOtherSessions, setRevokeOtherSessions] = useState(true);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -93,7 +91,7 @@ const ChangePassword = () => {
         setNewPassword("");
         setConfirmPassword("");
       }
-    } catch (err) {
+    } catch {
       showError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -113,7 +111,7 @@ const ChangePassword = () => {
   }
 
   return (
-    <Card className="max-w-xl mx-auto mt-10">
+    <Card className="w-full border-slate-200 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lock className="h-5 w-5" />
