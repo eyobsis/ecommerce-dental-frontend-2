@@ -1,10 +1,17 @@
 import { useProfileStore } from "@/store/use-sidebar-store";
 import { CreditCard, Lock, Award, User, Settings } from "lucide-react"; // Example icons
 
+type ProfileTab =
+  | "overview"
+  | "payments"
+  | "competencies"
+  | "security"
+  | "settings";
+
 export const Sidebar = () => {
   const { activeTab, setActiveTab } = useProfileStore();
 
-  const menuItems = [
+  const menuItems: { id: ProfileTab; label: string; icon: JSX.Element }[] = [
     { id: "overview", label: "Company Profile", icon: <User size={20} /> },
     {
       id: "payments",
@@ -23,7 +30,7 @@ export const Sidebar = () => {
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => setActiveTab(item.id as any)}
+            onClick={() => setActiveTab(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
               activeTab === item.id
                 ? "bg-blue-600 text-white shadow-md"

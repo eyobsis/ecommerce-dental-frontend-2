@@ -45,11 +45,20 @@ const competencySchema = z.object({
 });
 
 type CompetencyFormValues = z.infer<typeof competencySchema>;
-const CompetencyView = ({ competencies }: { competencies: any[] }) => {
+type Competency = {
+  id: string;
+  doctorName: string;
+  issueDate: string;
+  expirationDate: string;
+  isActive?: boolean;
+  licenseFile?: File | null;
+};
+
+const CompetencyView = ({ competencies }: { competencies: Competency[] }) => {
   const [open, setOpen] = useState(false);
-  const [selectedCompetency, setSelectedCompetency] = useState<any | null>(
-    null,
-  );
+  const [selectedCompetency, setSelectedCompetency] = useState<
+    Competency | null
+  >(null);
 
   const form = useForm<CompetencyFormValues>({
     resolver: zodResolver(competencySchema),
@@ -89,13 +98,13 @@ const CompetencyView = ({ competencies }: { competencies: any[] }) => {
     // }
   };
 
-  const handleEditClick = (competency: any) => {
+  const handleEditClick = (competency: Competency) => {
     setSelectedCompetency(competency);
     form.reset({
       doctorName: competency.doctorName,
       issueDate: competency.issueDate,
       expirationDate: competency.expirationDate,
-      licenseFile: competency.licenseFile || undefined,
+      licenseFile: competency.licenseFile ?? undefined,
     });
     setOpen(true);
   };

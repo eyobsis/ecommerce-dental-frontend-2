@@ -34,9 +34,9 @@ export default function SettingsPage() {
   if (!session?.user) {
     return <>loading</>;
   }
-  const userData = session?.user;
+  const userData = session.user as UserData;
 
-  const formatDate = (dateString: any) => {
+  const formatDate = (dateString: string | number | Date) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",

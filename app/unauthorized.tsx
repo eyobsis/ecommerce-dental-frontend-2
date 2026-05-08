@@ -1,4 +1,5 @@
 // app/unauthorized.tsx
+import Link from "next/link";
 export default function Unauthorized() {
   return (
     <html>
@@ -12,12 +13,12 @@ export default function Unauthorized() {
             You don’t have permission to view this page. Please sign in with the
             correct account or contact your administrator.
           </p>
-          <a
+          <Link
             href="/"
             className="mt-6 inline-block rounded-md bg-blue-600 px-6 py-3 text-white font-medium shadow hover:bg-blue-700 transition"
           >
             Return Home
-          </a>
+          </Link>
         </main>
       </body>
     </html>
