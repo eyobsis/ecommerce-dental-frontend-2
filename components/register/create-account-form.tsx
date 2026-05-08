@@ -28,19 +28,21 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/public/logo1.png";
+import { signIn } from "@/lib/auth-client";
 
 // ✅ Validation schema
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
+type SocialProviderKey = "google" | "facebook" | "twitter" | "linkedin";
 
 interface CreateAccountProps {
   onSubmit: (data: RegisterFormValues) => void;
-  onSocialSignUp?: (provider: string) => void;
+  onSocialSignUp?: (provider: SocialProviderKey) => void | Promise<void>;
 }
 
 const socialProviders = [
@@ -55,6 +57,8 @@ export default function CreateAccount({
   onSocialSignUp,
 }: CreateAccountProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [socialError, setSocialError] = useState<string | null>(null);
+  const [socialLoading, setSocialLoading] = useState<SocialProviderKey | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -66,6 +70,40 @@ export default function CreateAccount({
   });
 
   const loading = form.formState.isSubmitting;
+
+  const handleSocialSignUp = async (provider: SocialProviderKey) => {
+    setSocialError(null);
+    setSocialLoading(provider);
+
+    try {
+      if (onSocialSignUp) {
+        await onSocialSignUp(provider);
+        return;
+      }
+
+      const { error } = await signIn.social(
+        {
+          provider,
+          callbackURL: "/",
+          newUserCallbackURL: "/",
+          errorCallbackURL: "/auth/new",
+        },
+        {
+          onError: (ctx) => {
+            setSocialError(ctx.error.message || `Unable to continue with ${provider}.`);
+          },
+        },
+      );
+
+      if (error) {
+        setSocialError(error.message || `Unable to continue with ${provider}.`);
+      }
+    } catch {
+      setSocialError(`Unable to continue with ${provider}.`);
+    } finally {
+      setSocialLoading(null);
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -231,16 +269,28 @@ export default function CreateAccount({
               <div className="flex-grow border-t" />
             </div>
 
+            {socialError ? (
+              <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {socialError}
+              </p>
+            ) : null}
+
             {/* Social Buttons */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {socialProviders.map(({ name, icon: Icon, key }) => (
                 <Button
                   key={name}
+                  type="button"
                   variant="outline"
                   className="h-11 rounded-xl border-slate-300 text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-900"
-                  onClick={() => onSocialSignUp?.(key)}
+                  onClick={() => handleSocialSignUp(key)}
+                  disabled={loading || !!socialLoading}
                 >
-                  <Icon className="mr-2 h-4 w-4" />
+                  {socialLoading === key ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Icon className="mr-2 h-4 w-4" />
+                  )}
                   {name}
                 </Button>
               ))}

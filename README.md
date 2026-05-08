@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Authentication Setup
+
+This project uses Better Auth for:
+
+- Email/password sign-in and sign-up
+- Forgot/reset password flow
+- Social login/sign-up (Google, Facebook, Twitter, LinkedIn)
+
+To configure authentication variables, use [.env.example](.env.example) as the template.
+
+For a full file-by-file implementation breakdown, environment reference, and rollout checklist, see [docs/auth-feature-implementation.md](docs/auth-feature-implementation.md).
+
 ## Getting Started
 
 First, run the development server:

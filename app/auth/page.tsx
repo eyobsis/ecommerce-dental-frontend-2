@@ -34,21 +34,24 @@ import { signIn } from "@/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   remember: z.boolean().optional(),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
+type SocialProviderKey = "google" | "facebook" | "twitter" | "linkedin";
 
 const socialProviders = [
-  { name: "Google", icon: Chrome },
-  { name: "Facebook", icon: Facebook },
-  { name: "Twitter", icon: Twitter },
-  { name: "LinkedIn", icon: Linkedin },
+  { name: "Google", icon: Chrome, key: "google" as const },
+  { name: "Facebook", icon: Facebook, key: "facebook" as const },
+  { name: "Twitter", icon: Twitter, key: "twitter" as const },
+  { name: "LinkedIn", icon: Linkedin, key: "linkedin" as const },
 ];
 
 const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [socialLoading, setSocialLoading] = useState<SocialProviderKey | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -61,16 +64,53 @@ const AuthPage = () => {
 
   const loading = form.formState.isSubmitting;
   const onSubmit = async (data: LoginFormValues) => {
-    await signIn.email(
+    setAuthError(null);
+
+    const { error } = await signIn.email(
       {
-        ...data,
+        email: data.email,
+        password: data.password,
+        rememberMe: data.remember ?? true,
         callbackURL: "/",
       },
       {
         onSuccess: () => {},
-        onError: () => {},
+        onError: (ctx) => {
+          setAuthError(ctx.error.message || "Unable to sign in with email and password.");
+        },
       },
     );
+
+    if (error) {
+      setAuthError(error.message || "Unable to sign in with email and password.");
+    }
+  };
+
+  const handleSocialSignIn = async (provider: SocialProviderKey) => {
+    setAuthError(null);
+    setSocialLoading(provider);
+
+    const { error } = await signIn.social(
+      {
+        provider,
+        callbackURL: "/",
+        newUserCallbackURL: "/",
+        errorCallbackURL: "/auth",
+      },
+      {
+        onError: (ctx) => {
+          setAuthError(ctx.error.message || `Unable to continue with ${provider}.`);
+        },
+      },
+    );
+
+    if (error) {
+      setAuthError(error.message || `Unable to continue with ${provider}.`);
+      setSocialLoading(null);
+      return;
+    }
+
+    setSocialLoading(null);
   };
 
   return (
@@ -84,21 +124,61 @@ const AuthPage = () => {
       <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
         {/* Left Side */}
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
-          <div className="max-w-xl text-slate-100 transition-transform duration-500 hover:-translate-y-0.5">
+          <div className="max-w-2xl text-slate-100 transition-transform duration-500 hover:-translate-y-0.5">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-slate-200 backdrop-blur">
               <Sparkles className="h-3.5 w-3.5 text-amber-300" />
               Royal Access
             </span>
 
-            <Image
-              src={Logo}
-              alt="Company Logo"
-              width={130}
-              height={130}
-              priority
-              className="mt-8 mb-8"
-            />
-            <h1 className="text-5xl font-semibold leading-tight tracking-tight">
+            <div className="relative mt-8 mb-8">
+              <div className="absolute -inset-2 rounded-[2rem] bg-gradient-to-r from-cyan-400/20 via-indigo-400/20 to-sky-300/20 blur-2xl" />
+              <div className="relative rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-[0_20px_45px_rgba(15,23,42,0.35)]">
+                <div className="flex items-center gap-5">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-2xl bg-cyan-300/30 blur-lg" />
+                    <div className="relative h-24 w-24 rounded-2xl border border-white/30 bg-slate-900/60 p-3 ring-1 ring-white/20">
+                      <Image
+                        src={Logo}
+                        alt="Company Logo"
+                        width={96}
+                        height={96}
+                        priority
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100/90">
+                      Royal Dental Labs
+                    </p>
+                    <p className="text-2xl font-semibold tracking-tight text-white">
+                      Admin Command Center
+                    </p>
+                    <p className="text-sm text-slate-200/90">
+                      Monitor orders, inventory, and client requests in one secure workspace.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-xl border border-white/20 bg-slate-900/40 p-2">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-300">Live</p>
+                    <p className="text-sm font-semibold text-white">Orders</p>
+                  </div>
+                  <div className="rounded-xl border border-white/20 bg-slate-900/40 p-2">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-300">Realtime</p>
+                    <p className="text-sm font-semibold text-white">Inventory</p>
+                  </div>
+                  <div className="rounded-xl border border-white/20 bg-slate-900/40 p-2">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-300">Secure</p>
+                    <p className="text-sm font-semibold text-white">Clients</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">
               Welcome Back to
               <span className="block bg-gradient-to-r from-indigo-200 via-white to-sky-200 bg-clip-text text-transparent">
                 Royal Dental Commerce
@@ -207,19 +287,25 @@ const AuthPage = () => {
                     Remember me
                   </label>
 
-                  <a
-                    href="/forgot-password"
+                  <Link
+                    href="/auth/forgot-password"
                     className="text-indigo-700 hover:text-indigo-800 hover:underline"
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
+
+                {authError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {authError}
+                  </p>
+                ) : null}
 
                 {/* Submit */}
                 <Button
                   type="submit"
                   className="h-11 w-full rounded-xl bg-slate-900 text-base text-white hover:bg-slate-800"
-                  disabled={loading}
+                  disabled={loading || !!socialLoading}
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
@@ -238,13 +324,20 @@ const AuthPage = () => {
 
             {/* Social Buttons */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {socialProviders.map(({ name, icon: Icon }) => (
+              {socialProviders.map(({ name, icon: Icon, key }) => (
                 <Button
                   key={name}
+                  type="button"
                   variant="outline"
                   className="h-11 rounded-xl border-slate-300 text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-900"
+                  disabled={loading || !!socialLoading}
+                  onClick={() => handleSocialSignIn(key)}
                 >
-                  <Icon className="mr-2 h-4 w-4" />
+                  {socialLoading === key ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Icon className="mr-2 h-4 w-4" />
+                  )}
                   {name}
                 </Button>
               ))}
