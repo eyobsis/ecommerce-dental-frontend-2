@@ -272,14 +272,15 @@ const ProductDetailPage = () => {
         <div className="grid gap-6 md:gap-8 lg:grid-cols-[1.18fr_1fr] lg:gap-12">
           <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-white/85 p-2.5 shadow-[0_30px_80px_rgba(15,23,42,0.08)] sm:space-y-5 sm:p-5">
             <div className="relative overflow-hidden rounded-2xl bg-slate-100">
-              <Image
-                src={selectedImage || product.images[0]}
-                alt={product.name}
-                width={1400}
-                height={900}
-                unoptimized
-                className="h-[240px] w-full object-cover sm:h-[340px] md:h-[420px] lg:h-[520px]"
-              />
+              <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-[4/3]">
+                <Image
+                  src={selectedImage || product.images[0]}
+                  alt={product.name}
+                  fill
+                  unoptimized
+                  className="object-contain object-center w-full h-full"
+                />
+              </div>
               <span className="absolute left-4 top-4 rounded-full border border-white/40 bg-slate-900/80 px-3 py-1 text-xs font-medium text-white backdrop-blur">
                 Dental Catalog
               </span>
@@ -295,20 +296,21 @@ const ProductDetailPage = () => {
                   <button
                     key={`${img}-${index}`}
                     onClick={() => setSelectedImage(img)}
-                    className={`min-w-14 overflow-hidden rounded-xl border transition sm:min-w-0 ${
+                    className={`min-w-14 transition sm:min-w-0 ${
                       selectedImage === img
                         ? "border-slate-900 ring-2 ring-slate-900/20"
                         : "border-slate-200 hover:border-slate-400"
                     }`}
                   >
-                    <Image
-                      src={img}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      width={120}
-                      height={120}
-                      unoptimized
-                      className="h-14 w-14 object-cover sm:h-20 sm:w-full"
-                    />
+                    <div className="relative h-14 w-14 overflow-hidden rounded-xl sm:h-20 sm:w-20">
+                      <Image
+                        src={img}
+                        alt={`${product.name} thumbnail ${index + 1}`}
+                        fill
+                        unoptimized
+                        className="object-cover object-center"
+                      />
+                    </div>
                   </button>
                 ))}
               </div>
