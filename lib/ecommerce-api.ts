@@ -7,6 +7,7 @@ import type {
   ProductFilterOptions,
   ProductVariant,
 } from "@/types/ecommerce";
+import { endOfDay, startOfDay } from "date-fns";
 
 const backendUrl =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ||
@@ -306,8 +307,14 @@ export const ecommerceApi = {
     if (params?.filter) query.set("filter", params.filter);
 
     if (params?.from && params?.to) {
-      const fromStr = params.from instanceof Date ? params.from.toISOString() : params.from;
-      const toStr = params.to instanceof Date ? params.to.toISOString() : params.to;
+      const fromStr =
+        params.from instanceof Date
+          ? startOfDay(params.from).toISOString()
+          : params.from;
+      const toStr =
+        params.to instanceof Date
+          ? endOfDay(params.to).toISOString()
+          : params.to;
       query.set("from", fromStr);
       query.set("to", toStr);
     }

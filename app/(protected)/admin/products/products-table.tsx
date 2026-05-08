@@ -118,7 +118,7 @@ export const ProductsTable = ({
       {/* Table Card Wrapper */}
       <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[980px]">
             <TableHeader>
               <TableRow className="border-b border-slate-200 bg-slate-50/80 hover:bg-slate-50/80">
                 {columns.map((col) => (
@@ -201,7 +201,7 @@ export const ProductsTable = ({
 
         {/* Table Footer Pagination */}
         {!loading && filteredData.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50/50">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3 border-t border-slate-200 bg-slate-50/50">
             <p className="text-xs text-slate-500">
               Showing <span className="font-medium text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-slate-900">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="font-medium text-slate-900">{filteredData.length}</span> items
             </p>
