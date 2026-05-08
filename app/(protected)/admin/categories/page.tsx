@@ -15,8 +15,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddCategoryDialog } from "@/components/category/add-category-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-import { Search } from "lucide-react";
+import { Layers3, Search } from "lucide-react";
 
 // ─────────────────────────────────────────────
 // ✅ TYPES
@@ -39,11 +49,11 @@ const columns: ColumnDef<Category>[] = [
 
       return (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-500 text-xs font-bold text-white shadow-sm">
             {name.charAt(0)}
           </div>
 
-          <span className="font-medium text-gray-900">{name}</span>
+          <span className="font-medium text-slate-900">{name}</span>
         </div>
       );
     },
@@ -52,7 +62,7 @@ const columns: ColumnDef<Category>[] = [
     accessorKey: "productsCount",
     header: "Products",
     cell: ({ row }) => (
-      <span className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium">
+      <span className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
         {row.original.productsCount}
       </span>
     ),
@@ -83,130 +93,126 @@ const CategoriesPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Categories
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your product categories
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            {/* SEARCH */}
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-
-              <Input
-                placeholder="Search categories..."
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="pl-9 w-64 bg-white border-gray-200 focus:ring-1 focus:ring-indigo-500"
-              />
+    <div className="space-y-6">
+      <Card className="border-0 bg-gradient-to-r from-slate-50 to-white shadow-sm ring-1 ring-slate-200/70">
+        <CardContent className="p-5 md:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <Badge variant="secondary" className="rounded-full">
+                Catalog
+              </Badge>
+              <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+                Categories
+              </h1>
+              <p className="mt-1 text-sm text-slate-500">
+                Organize and manage product categories.
+              </p>
             </div>
 
-            <AddCategoryDialog />
+            <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+              <div className="relative w-full sm:w-[280px]">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Search categories..."
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="h-10 border-slate-200 bg-white pl-9"
+                />
+              </div>
+              <AddCategoryDialog />
+            </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* TABLE */}
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <Card className="overflow-hidden border-slate-200 shadow-sm">
+        <CardHeader className="border-b bg-slate-50/60 px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Layers3 className="h-4 w-4 text-indigo-600" />
+                Category List
+              </CardTitle>
+              <CardDescription>
+                Total: {categories.length} categories
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
 
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-
-              {/* HEADER */}
-              <thead className="bg-gray-50 text-gray-500 text-xs uppercase sticky top-0">
+            <Table className="min-w-[640px]">
+              <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
+                  <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className="px-6 py-4 text-left font-medium"
-                      >
+                      <TableHead key={header.id} className="px-4 sm:px-6">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
+                  </TableRow>
                 ))}
-              </thead>
+              </TableHeader>
 
-              {/* BODY */}
-              <tbody>
-                {table.getRowModel().rows.map((row, i) => (
-                  <tr
-                    key={row.id}
-                    className={`
-                      border-b border-gray-100
-                      ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
-                      hover:bg-indigo-50/40
-                      transition-colors
-                    `}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-
-                {table.getRowModel().rows.length === 0 && (
-                  <tr>
-                    <td
+              <TableBody>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="px-4 py-4 sm:px-6">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
                       colSpan={columns.length}
-                      className="text-center py-10 text-gray-500"
+                      className="py-12 text-center text-slate-500"
                     >
                       No categories found
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
+        </CardContent>
 
-          {/* FOOTER */}
-          <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex flex-col gap-3 border-t bg-slate-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <span className="text-sm text-slate-500">
+            Page {table.getState().pagination.pageIndex + 1}
+          </span>
 
-            <span className="text-sm text-gray-500">
-              Page {table.getState().pagination.pageIndex + 1}
-            </span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white border-gray-200 hover:bg-gray-100"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white border-gray-200 hover:bg-gray-100"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
