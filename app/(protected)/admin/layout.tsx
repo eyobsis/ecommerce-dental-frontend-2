@@ -36,5 +36,9 @@ export default async function ProtectedLayout({
   }
 
   // 5. Render children if authorized
-  return <>{children}</>;
+  return <>
+  <main className=" w-full">
+     <div className="px-4">{children}</div>
+  </main>
+  </>;
 }

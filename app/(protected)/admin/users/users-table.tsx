@@ -12,8 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  columns: any[];
-  data: any[];
+  columns: Array<{
+    key: string;
+    header: string;
+    render?: (row: Record<string, unknown>) => React.ReactNode;
+  }>;
+  data: Array<Record<string, unknown>>;
   pageSize?: number; // optional, default 10
 }
 
@@ -37,9 +41,8 @@ export const UsersTable = ({ columns, data, pageSize = 10 }: Props) => {
 
   return (
     <div className="space-y-4">
-      {/* Table */}
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+        <Table className="min-w-[760px]">
           <TableHeader>
             <TableRow>
               {columns.map((col) => (
@@ -51,10 +54,10 @@ export const UsersTable = ({ columns, data, pageSize = 10 }: Props) => {
           <TableBody>
             {paginatedData.length > 0 ? (
               paginatedData.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={String(row.id)}>
                   {columns.map((col) => (
                     <TableCell key={col.key}>
-                      {col.render ? col.render(row) : row[col.key]}
+                      {col.render ? col.render(row) : String(row[col.key] ?? "-")}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -63,7 +66,7 @@ export const UsersTable = ({ columns, data, pageSize = 10 }: Props) => {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-6"
+                  className="text-center py-10"
                 >
                   No users found.
                 </TableCell>
@@ -75,8 +78,8 @@ export const UsersTable = ({ columns, data, pageSize = 10 }: Props) => {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <div className="text-sm text-muted-foreground">
             Page {currentPage} of {totalPages}
           </div>
 

@@ -51,7 +51,11 @@ interface DashboardStore {
   error: string | null;
 
   // Actions
-  fetchDashboardStats: () => Promise<void>;
+  fetchDashboardStats: (params?: {
+    filter?: string;
+    from?: Date;
+    to?: Date;
+  }) => Promise<void>;
 
   // Optional: reset / clear
   reset: () => void;
@@ -103,7 +107,6 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
         message = err;
       }
       set({ error: message, loading: false });
-      // eslint-disable-next-line no-console
       console.error('[dashboardStore] fetchDashboardStats failed:', err);
     }
   },
