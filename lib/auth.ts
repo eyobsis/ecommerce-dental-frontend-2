@@ -1,10 +1,32 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
-import { env } from "@/config/env";
 import { db } from "@/db";
+import { env } from "@/config/env";
 import { resolveUserDefaults, authTrustedOrigins } from "@/lib/auth-config";
 import { sendResetPasswordEmail } from "@/lib/auth-email";
+
+type GoogleProfileInput = {
+  given_name?: string;
+  family_name?: string;
+  email?: string;
+};
+
+type FacebookProfileInput = {
+  id?: string;
+  name?: string;
+  email?: string;
+};
+
+type TwitterProfileInput = {
+  data?: {
+    id?: string;
+    name?: string;
+    email?: string | null;
+    profile_image_url?: string;
+    username?: string;
+  };
+};
 
 const socialProviders = {
   ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
@@ -13,6 +35,17 @@ const socialProviders = {
           clientId: env.GOOGLE_CLIENT_ID,
           clientSecret: env.GOOGLE_CLIENT_SECRET,
           prompt: "select_account" as const,
+          mapProfileToUser: (profile: GoogleProfileInput) => {
+            const fullName = [profile.given_name, profile.family_name]
+              .filter(Boolean)
+              .join(" ")
+              .trim();
+
+            return {
+              name: fullName || undefined,
+              email: profile.email,
+            };
+          },
         },
       }
     : {}),
@@ -21,6 +54,10 @@ const socialProviders = {
         facebook: {
           clientId: env.FACEBOOK_CLIENT_ID,
           clientSecret: env.FACEBOOK_CLIENT_SECRET,
+          mapProfileToUser: (profile: FacebookProfileInput) => ({
+            name: profile.name,
+            email: profile.email ?? `${profile.id}@facebook.placeholder.local`,
+          }),
         },
       }
     : {}),
@@ -29,20 +66,25 @@ const socialProviders = {
         twitter: {
           clientId: env.TWITTER_CLIENT_ID,
           clientSecret: env.TWITTER_CLIENT_SECRET,
+          mapProfileToUser: (profile: TwitterProfileInput) => {
+            const twitterId =
+              profile.data?.id ?? profile.data?.username ?? "twitter-user";
+
+            return {
+              name: profile.data?.name,
+              email:
+                profile.data?.email ?? `${twitterId}@twitter.placeholder.local`,
+              image: profile.data?.profile_image_url,
+            };
+          },
         },
       }
     : {}),
-  ...(env.LINKEDIN_CLIENT_ID && env.LINKEDIN_CLIENT_SECRET
-    ? {
-        linkedin: {
-          clientId: env.LINKEDIN_CLIENT_ID,
-          clientSecret: env.LINKEDIN_CLIENT_SECRET,
-        },
-      }
-    : {}),
+
 };
 
 export const auth = betterAuth({
+  baseURL: env.AUTH_APP_URL,
   database: drizzleAdapter(db, {
     provider: "pg",
   }),

@@ -1,42 +1,77 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  Loader2,
   User,
   Mail,
   Phone,
   Briefcase,
   Calendar,
   Shield,
-  CheckCircle,
+  Chrome,
+  Facebook,
+  Twitter,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import ChangePassword from "./change-password";
-import { useSession } from "@/lib/auth-client";
-
-interface UserData {
-  id: string;
-  name: string;
-  email: string;
-  phone_number: string;
-  pos_type: string;
-  clinic_name: string | null;
-  accountType: string;
-  employee_status: string;
-  createdAt: string;
-}
+import { authClient, useSession } from "@/lib/auth-client";
 
 type Page = "profile" | "password";
 
+type SocialProviderKey = "google" | "facebook" | "twitter";
+
+const socialProviders: Array<{
+  key: SocialProviderKey;
+  label: string;
+  icon: typeof Chrome;
+}> = [
+  { key: "google", label: "Google", icon: Chrome },
+  { key: "facebook", label: "Facebook", icon: Facebook },
+  { key: "twitter", label: "Twitter", icon: Twitter },
+];
+
 export default function SettingsPage() {
   const [currentPage, setCurrentPage] = useState<Page>("profile");
+  const [linkingProvider, setLinkingProvider] = useState<SocialProviderKey | null>(null);
+  const [unlinkingProvider, setUnlinkingProvider] = useState<SocialProviderKey | null>(null);
+  const [enabledProviders, setEnabledProviders] = useState<SocialProviderKey[]>([
+    "google",
+    "facebook",
+    "twitter",
+  ]);
+  const [accountActionError, setAccountActionError] = useState<string | null>(null);
+  const [accountActionSuccess, setAccountActionSuccess] = useState<string | null>(null);
   const { data: session } = useSession();
+
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const response = await fetch("/api/auth/providers", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as { providers?: SocialProviderKey[] };
+        if (Array.isArray(data.providers)) {
+          setEnabledProviders(data.providers);
+        }
+      } catch {
+        // Keep optimistic defaults if provider list cannot be loaded.
+      }
+    };
+
+    void loadProviders();
+  }, []);
+
+  const visibleSocialProviders = useMemo(
+    () => socialProviders.filter((provider) => enabledProviders.includes(provider.key)),
+    [enabledProviders],
+  );
 
   if (!session?.user) {
     return <>loading</>;
   }
-  const userData = session.user as UserData;
+  const userData = session?.user;
 
-  const formatDate = (dateString: string | number | Date) => {
+  const formatDate = (dateString: string | Date) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -46,16 +81,39 @@ export default function SettingsPage() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    if (status === "ACTIVE") {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-          <CheckCircle className="w-4 h-4 mr-1" />
-          Active
-        </span>
-      );
+  const handleLinkAccount = async (provider: SocialProviderKey) => {
+    setAccountActionError(null);
+    setAccountActionSuccess(null);
+    setLinkingProvider(provider);
+
+    try {
+      await authClient.linkSocial({
+        provider,
+        callbackURL: "/profile",
+      });
+      setAccountActionSuccess(`Successfully linked ${provider}.`);
+    } catch {
+      setAccountActionError(`Unable to link ${provider}. Please try again.`);
+    } finally {
+      setLinkingProvider(null);
     }
-    return <span className="text-gray-500">{status}</span>;
+  };
+
+  const handleUnlinkAccount = async (provider: SocialProviderKey) => {
+    setAccountActionError(null);
+    setAccountActionSuccess(null);
+    setUnlinkingProvider(provider);
+
+    try {
+      await authClient.unlinkAccount({
+        providerId: provider,
+      });
+      setAccountActionSuccess(`Successfully disconnected ${provider}.`);
+    } catch {
+      setAccountActionError(`Unable to disconnect ${provider}. Please try again.`);
+    } finally {
+      setUnlinkingProvider(null);
+    }
   };
 
   return (
@@ -155,6 +213,58 @@ export default function SettingsPage() {
                       <Briefcase className="w-6 h-6 mr-3 text-blue-600" />
                       Work & Account
                     </h3>
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-500">
+                        Connect a social account to make future sign-ins easier.
+                      </p>
+
+                      {accountActionError ? (
+                        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                          {accountActionError}
+                        </p>
+                      ) : null}
+
+                      {accountActionSuccess ? (
+                        <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                          {accountActionSuccess}
+                        </p>
+                      ) : null}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {visibleSocialProviders.map(({ key, label, icon: Icon }) => (
+                          <div key={key} className="space-y-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleLinkAccount(key)}
+                              disabled={linkingProvider !== null || unlinkingProvider !== null}
+                              className="h-11 w-full justify-start gap-2"
+                            >
+                              {linkingProvider === key ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Icon className="h-4 w-4" />
+                              )}
+                              {linkingProvider === key ? `Linking ${label}` : `Link ${label}`}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => handleUnlinkAccount(key)}
+                              disabled={linkingProvider !== null || unlinkingProvider !== null}
+                              className="h-10 w-full justify-start px-3 text-sm text-slate-600"
+                            >
+                              {unlinkingProvider === key ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : null}
+                              {unlinkingProvider === key
+                                ? `Disconnecting ${label}`
+                                : `Disconnect ${label}`}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Account Creation */}

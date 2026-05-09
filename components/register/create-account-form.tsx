@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,7 +13,6 @@ import {
   Chrome,
   Facebook,
   Twitter,
-  Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,18 +37,21 @@ const registerSchema = z.object({
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
-type SocialProviderKey = "google" | "facebook" | "twitter" | "linkedin";
+type SocialProviderKey = "google" | "facebook" | "twitter";
 
 interface CreateAccountProps {
   onSubmit: (data: RegisterFormValues) => void;
   onSocialSignUp?: (provider: SocialProviderKey) => void | Promise<void>;
 }
 
-const socialProviders = [
+const socialProviders: Array<{
+  name: string;
+  icon: typeof Chrome;
+  key: SocialProviderKey;
+}> = [
   { name: "Google", icon: Chrome, key: "google" },
   { name: "Facebook", icon: Facebook, key: "facebook" },
   { name: "Twitter", icon: Twitter, key: "twitter" },
-  { name: "LinkedIn", icon: Linkedin, key: "linkedin" }, 
 ];
 
 export default function CreateAccount({
@@ -59,6 +61,33 @@ export default function CreateAccount({
   const [showPassword, setShowPassword] = useState(false);
   const [socialError, setSocialError] = useState<string | null>(null);
   const [socialLoading, setSocialLoading] = useState<SocialProviderKey | null>(null);
+  const [enabledProviders, setEnabledProviders] = useState<SocialProviderKey[]>([
+    "google",
+    "facebook",
+    "twitter",
+  ]);
+
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const response = await fetch("/api/auth/providers", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as { providers?: SocialProviderKey[] };
+        if (Array.isArray(data.providers)) {
+          setEnabledProviders(data.providers);
+        }
+      } catch {
+        // Keep optimistic defaults if provider list cannot be loaded.
+      }
+    };
+
+    void loadProviders();
+  }, []);
+
+  const visibleSocialProviders = useMemo(
+    () => socialProviders.filter((provider) => enabledProviders.includes(provider.key)),
+    [enabledProviders],
+  );
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -277,7 +306,7 @@ export default function CreateAccount({
 
             {/* Social Buttons */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {socialProviders.map(({ name, icon: Icon, key }) => (
+              {visibleSocialProviders.map(({ name, icon: Icon, key }) => (
                 <Button
                   key={name}
                   type="button"

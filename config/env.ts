@@ -64,8 +64,7 @@ const envSchema = z.object({
   FACEBOOK_CLIENT_SECRET: z.string().default(""),
   TWITTER_CLIENT_ID: z.string().default(""),
   TWITTER_CLIENT_SECRET: z.string().default(""),
-  LINKEDIN_CLIENT_ID: z.string().default(""),
-  LINKEDIN_CLIENT_SECRET: z.string().default(""),
+
 });
 
 // Parse process.env with defaults

@@ -8,16 +8,7 @@ const authBaseURL =
     ? window.location.origin
     : "http://localhost:3000");
 
-export const {
-  signIn,
-  signUp,
-  signOut,
-  useSession,
-  getSession,
-  changePassword,
-  requestPasswordReset,
-  resetPassword,
-} = createAuthClient({
+export const authClient = createAuthClient({
   baseURL: authBaseURL,
   plugins: [
     inferAdditionalFields({
@@ -35,3 +26,14 @@ export const {
     }),
   ],
 });
+
+export const {
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  getSession,
+  changePassword,
+  requestPasswordReset,
+  resetPassword,
+} = authClient;
